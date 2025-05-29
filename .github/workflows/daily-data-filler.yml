@@ -1,0 +1,29 @@
+name: Daily Data Filler
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Runs at midnight UTC every day
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  fill-missing-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run data filler script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_USER_EMAIL: ${{ secrets.SUPABASE_USER_EMAIL }}
+          SUPABASE_USER_PASSWORD: ${{ secrets.SUPABASE_USER_PASSWORD }}
+        run: node scripts/fill-missing-data.js

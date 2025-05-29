@@ -50,6 +50,7 @@
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 h1,
@@ -206,6 +207,8 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .calendar-header {
   text-align: center;
@@ -218,6 +221,8 @@ button:disabled {
   display: flex;
   justify-content: center;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .calendar-weekdays {
   margin-bottom: 0.5rem;
@@ -233,6 +238,9 @@ button:disabled {
   border-radius: 50%;
   margin: 2px;
   transition: background 0.2s;
+  width: 14.28vw; /* 100vw / 7 days */
+  max-width: 40px;
+  box-sizing: border-box;
 }
 .calendar-weekday {
   font-weight: 500;
@@ -312,4 +320,52 @@ button:disabled {
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
+  display: none;
+}
+
+html,
+body,
+#root {
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .app {
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.5rem 0 0 0;
+  }
+  .calendar-grid {
+    padding: 0;
+    max-width: 100vw;
+    background: none;
+    border-radius: 0;
+    margin: 0 0 1.2rem 0;
+    box-shadow: none;
+  }
+  .prediction-display {
+    padding: 0.5rem 0 0.5rem 0;
+    background: none;
+    border-radius: 0;
+    margin-bottom: 0.5rem;
+    box-shadow: none;
+    display: none;
+  }
+  .calendar-cell {
+    width: 12vw;
+    max-width: 32px;
+    font-size: 0.9rem;
+    padding: 0.1rem 0;
+  }
+  .calendar-header {
+    font-size: 1rem;
+  }
+  .calendar-cycle-day {
+    top: 0px;
+    left: -6px;
+  }
 }

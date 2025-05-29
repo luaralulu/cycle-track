@@ -48,7 +48,6 @@ function App() {
         setUserId(user.id);
 
         const data = await getCycleData(user.id);
-        console.log("Fetched cycle data:", data); // Debug log
         setCycleData(data);
 
         // Phase 3: Prediction Engine

@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import { format, parseISO, addDays, differenceInDays } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -32,6 +34,7 @@ const MIN_CYCLE_DAY = 1;
 const MAX_CYCLE_DAY = 35; // Reasonable maximum cycle length
 const PERIOD_START_DAY = 2;
 const PERIOD_END_DAY = 5;
+const TIMEZONE = "Australia/Sydney"; // AEST timezone
 
 async function signIn() {
   try {
@@ -65,22 +68,18 @@ async function getLastEntry(userId) {
   }
 }
 
-async function checkYesterdayEntry(userId) {
+async function checkEntryExists(userId, date) {
   try {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split("T")[0];
-
     const { data, error } = await supabase
       .from("cycle_data")
       .select("*")
       .eq("user_id", userId)
-      .eq("date", yesterdayStr);
+      .eq("date", date);
 
     if (error) throw error;
     return data[0];
   } catch (error) {
-    console.error("Failed to check yesterday's entry");
+    console.error("Failed to check entry");
     throw error;
   }
 }
@@ -112,6 +111,15 @@ async function insertEntry(userId, date, cycleDay, period) {
   }
 }
 
+function getAESTDate() {
+  const now = new Date();
+  return new Date(formatInTimeZone(now, TIMEZONE, "yyyy-MM-dd'T'HH:mm:ssXXX"));
+}
+
+function formatDate(date) {
+  return format(date, "yyyy-MM-dd");
+}
+
 async function main() {
   try {
     console.log("Starting daily data filler...");
@@ -131,34 +139,63 @@ async function main() {
       cycle_day: lastEntry.cycle_day,
     });
 
-    // Check if yesterday's entry exists
-    const yesterdayEntry = await checkYesterdayEntry(user.id);
-    if (yesterdayEntry) {
-      console.log("Yesterday's entry already exists");
+    // Get current date in AEST
+    const currentDate = getAESTDate();
+    // Calculate yesterday in AEST
+    const yesterdayAEST = addDays(currentDate, -1);
+
+    const lastEntryDate = parseISO(lastEntry.date);
+    // Only fill up to yesterday
+    const daysDifference = differenceInDays(yesterdayAEST, lastEntryDate);
+
+    if (daysDifference <= 0) {
+      console.log("No missing days to fill");
       return;
     }
 
-    // Calculate new entry
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split("T")[0];
+    console.log(`Found ${daysDifference} missing days to fill`);
 
-    const newCycleDay = lastEntry.cycle_day + 1;
-    const isPeriod =
-      newCycleDay >= PERIOD_START_DAY && newCycleDay <= PERIOD_END_DAY;
+    // Fill missing days
+    let currentCycleDay = lastEntry.cycle_day;
+    let currentDateToFill = addDays(lastEntryDate, 1);
 
-    // Insert new entry
-    const newEntry = await insertEntry(
-      user.id,
-      yesterdayStr,
-      newCycleDay,
-      isPeriod
-    );
+    for (let i = 0; i < daysDifference; i++) {
+      const dateStr = formatDate(currentDateToFill);
 
-    console.log("Inserted new entry:", {
-      date: newEntry.date,
-      cycle_day: newEntry.cycle_day,
-    });
+      // Check if entry already exists
+      const existingEntry = await checkEntryExists(user.id, dateStr);
+      if (existingEntry) {
+        console.log(`Entry for ${dateStr} already exists, skipping`);
+        currentDateToFill = addDays(currentDateToFill, 1);
+        continue;
+      }
+
+      // Calculate new cycle day
+      currentCycleDay = currentCycleDay + 1;
+      if (currentCycleDay > MAX_CYCLE_DAY) {
+        currentCycleDay = MIN_CYCLE_DAY;
+      }
+
+      const isPeriod =
+        currentCycleDay >= PERIOD_START_DAY &&
+        currentCycleDay <= PERIOD_END_DAY;
+
+      // Insert new entry
+      const newEntry = await insertEntry(
+        user.id,
+        dateStr,
+        currentCycleDay,
+        isPeriod
+      );
+
+      console.log("Inserted new entry:", {
+        date: newEntry.date,
+        cycle_day: newEntry.cycle_day,
+      });
+
+      currentDateToFill = addDays(currentDateToFill, 1);
+    }
+
     console.log("Daily data filler completed successfully");
   } catch (error) {
     console.error("Script execution failed");

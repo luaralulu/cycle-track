@@ -66,17 +66,17 @@ Here's your TODO checklist in **Markdown** format, structured in phases from eas
 
 ## 📅 Phase 4: Calendar UI
 
-- [ ] Display traditional calendar grid
+- [x] Display traditional calendar grid
       **Acceptance Criteria**: Current month is shown in grid format.
 
-- [ ] Style:
+- [x] Style:
 
   - Period days (pink-red)
   - PMS days (dark gray with white text and small cycle day inside)
   - Neutral days (default)
     **Acceptance Criteria**: Visual styling matches specification and mockup.
 
-- [ ] Show cycle day for each date
+- [x] Show cycle day for each date
       **Acceptance Criteria**: Cycle day is clearly displayed inside day cell.
 
 - [ ] Animate month transitions and data updates

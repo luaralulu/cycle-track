@@ -7,6 +7,18 @@ import {
   calculateAverageCycleLength,
 } from "./lib/supabase";
 import "./App.css";
+import {
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+  isSameMonth,
+  isSameDay,
+  format,
+  parseISO,
+  addMonths,
+} from "date-fns";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -98,6 +110,120 @@ function App() {
   const shouldShowLogButton =
     lastEntry && !lastEntry.period && lastEntry.cycle_day >= 20;
 
+  // Helper: get all days for a given month in a grid
+  const getMonthDays = (monthDate: Date) => {
+    const monthStart = startOfMonth(monthDate);
+    const monthEnd = endOfMonth(monthDate);
+    const weekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    const days: Date[] = [];
+    let day = weekStart;
+    while (day <= weekEnd) {
+      days.push(day);
+      day = addDays(day, 1);
+    }
+    return days;
+  };
+
+  // Helper: get period and PMS days for the month
+  const periodDates = new Set(
+    cycleData
+      .filter((e) => e.period)
+      .map((e) => format(parseISO(e.date), "yyyy-MM-dd"))
+  );
+  const cycleDayMap = Object.fromEntries(
+    cycleData.map((e) => [format(parseISO(e.date), "yyyy-MM-dd"), e.cycle_day])
+  );
+  // Predicted PMS days
+  let predictedPMS = new Set<string>();
+  if (pmsWindow && nextPeriodStart) {
+    let d = pmsWindow.start;
+    while (d <= pmsWindow.end) {
+      predictedPMS.add(format(d, "yyyy-MM-dd"));
+      d = addDays(d, 1);
+    }
+  }
+  // Predicted period days
+  let predictedPeriod = new Set<string>();
+  if (nextPeriodStart) {
+    for (let i = 0; i < 5; i++) {
+      const d = addDays(nextPeriodStart, i);
+      predictedPeriod.add(format(d, "yyyy-MM-dd"));
+    }
+  }
+
+  // Predict cycle days for future dates
+  const getPredictedCycleDay = (date: Date) => {
+    if (!nextPeriodStart || !averageCycleLength) return null;
+    // Find the last logged cycle start
+    const lastCycleStart = cycleData.find((e) => e.cycle_day === 1);
+    if (!lastCycleStart) return null;
+    const lastStartDate = parseISO(lastCycleStart.date);
+    let cycleDay = 1;
+    let d = new Date(lastStartDate);
+    while (d < date) {
+      cycleDay++;
+      if (cycleDay > averageCycleLength) cycleDay = 1;
+      d = addDays(d, 1);
+    }
+    return cycleDay;
+  };
+
+  // Calendar rendering for a given month
+  const renderCalendar = (monthDate: Date) => {
+    const days = getMonthDays(monthDate);
+    // Split days into weeks (arrays of 7)
+    const weeks: Date[][] = [];
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7));
+    }
+    return (
+      <div className="calendar-grid">
+        <div className="calendar-header">{format(monthDate, "MMMM yyyy")}</div>
+        <div className="calendar-row calendar-weekdays">
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((wd) => (
+            <div key={wd} className="calendar-cell calendar-weekday">
+              {wd}
+            </div>
+          ))}
+        </div>
+        {weeks.map((week, wIdx) => (
+          <div className="calendar-row calendar-days" key={wIdx}>
+            {week.map((date) => {
+              const dateStr = format(date, "yyyy-MM-dd");
+              const isCurrentMonth = isSameMonth(date, monthDate);
+              const isPeriod = periodDates.has(dateStr);
+              const isPredictedPeriod =
+                predictedPeriod.has(dateStr) && !isPeriod;
+              const isPMS = predictedPMS.has(dateStr);
+              const cycleDay =
+                cycleDayMap[dateStr] || getPredictedCycleDay(date);
+              return (
+                <div
+                  key={dateStr}
+                  className={`calendar-cell calendar-day${
+                    isCurrentMonth
+                      ? (isPeriod
+                          ? " calendar-period"
+                          : isPredictedPeriod
+                          ? " calendar-predicted-period"
+                          : "") + (isPMS ? " calendar-pms" : "")
+                      : " calendar-out"
+                  }`}
+                >
+                  <div className="calendar-date">{date.getDate()}</div>
+                  {cycleDay && (
+                    <div className="calendar-cycle-day">{cycleDay}</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="app">
       <h1>Cycle Tracker</h1>
@@ -108,15 +234,7 @@ function App() {
       )}
 
       {/* Phase 3: Prediction Engine UI */}
-      <div
-        className="prediction-display"
-        style={{
-          background: "#f0f0f0",
-          padding: "10px",
-          borderRadius: "5px",
-          color: "#333",
-        }}
-      >
+      <div className="prediction-display">
         <h2>Predictions</h2>
         {averageCycleLength && nextPeriodStart ? (
           <>
@@ -151,22 +269,8 @@ function App() {
         )}
       </div>
 
-      <div className="data-display">
-        <h2>Recent Entries</h2>
-        <ul>
-          {recentEntries.map((entry) => (
-            <li key={entry.id}>
-              {new Date(entry.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}{" "}
-              - Day {entry.cycle_day}
-              {entry.period && <span className="period-indicator">🩸</span>}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {renderCalendar(new Date())}
+      {renderCalendar(addMonths(new Date(), 1))}
 
       {showConfirmModal && (
         <div className="modal-overlay">

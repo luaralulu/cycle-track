@@ -250,12 +250,18 @@ button:disabled {
   box-shadow: 0 2px 8px rgba(255, 143, 163, 0.1);
 }
 .calendar-predicted-period {
-  background: #ffd6e0;
-  color: #ff4d6d;
+  background: none;
+  border: 2px dotted #ff8fa3;
+  color: #ff8fa3;
   font-weight: 600;
+  box-sizing: border-box;
+}
+.calendar-predicted-period .calendar-cycle-day {
+  background: #ff8fa3;
+  color: #fff;
 }
 .calendar-pms {
-  background: #444;
+  background: #757474;
   color: #fff;
   font-weight: 600;
 }
@@ -277,7 +283,7 @@ button:disabled {
   color: #fff;
 }
 .calendar-pms .calendar-cycle-day {
-  background: #444;
+  background: #757474;
   color: #fff;
 }
 .calendar-date {

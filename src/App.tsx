@@ -203,8 +203,10 @@ function App() {
                   key={dateStr}
                   className={`calendar-cell calendar-day${
                     isCurrentMonth
-                      ? (isPeriod || isPredictedPeriod
+                      ? (isPeriod
                           ? " calendar-period"
+                          : isPredictedPeriod
+                          ? " calendar-predicted-period"
                           : "") + (isPMS ? " calendar-pms" : "")
                       : " calendar-out"
                   }`}

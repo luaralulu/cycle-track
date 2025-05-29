@@ -2,7 +2,8 @@ name: Daily Data Filler
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Runs at midnight UTC every day
+    # Runs at 2:20 AM AEST (16:20 UTC) every day
+    - cron: "20 16 * * *"
   workflow_dispatch: # Allows manual trigger
 
 jobs:

@@ -1,7 +1,3 @@
-Here's your TODO checklist in **Markdown** format, structured in phases from easiest to hardest, with **acceptance criteria** for each item.
-
----
-
 # ✅ Menstrual Cycle Tracker – Implementation Checklist
 
 ## 📍 Phase 1: Base Setup and Logging
@@ -27,7 +23,7 @@ Here's your TODO checklist in **Markdown** format, structured in phases from eas
 - [x] When clicked, insert today's date with `cycle_day = 1`, `period = true`, and correct `user_id`
       **Acceptance Criteria**: Entry appears in Supabase with today's date and correct values.
 
-- [ ] Recalculate predictions and update calendar view on log
+- [x] Recalculate predictions and update calendar view on log
       **Acceptance Criteria**: Next predicted period and PMS days update correctly after logging.
 
 ---
@@ -79,12 +75,5 @@ Here's your TODO checklist in **Markdown** format, structured in phases from eas
 - [x] Show cycle day for each date
       **Acceptance Criteria**: Cycle day is clearly displayed inside day cell.
 
-- [ ] Animate month transitions and data updates
-      **Acceptance Criteria**: Navigating between months feels smooth.
-
 - [ ] Click a day to manually edit `period` or `cycle_day`
       **Acceptance Criteria**: Click opens a modal or inline editor; changes are saved to Supabase.
-
----
-
-Let me know if you'd like this turned into a GitHub issue list or need help building the cron script or UI components next.

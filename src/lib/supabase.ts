@@ -48,3 +48,49 @@ export const logPeriod = async (userId: string) => {
   if (error) throw error;
   return data;
 };
+
+export const getLast12CycleStarts = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("cycle_data")
+    .select("date")
+    .eq("user_id", userId)
+    .eq("cycle_day", 1)
+    .order("date", { ascending: false })
+    .limit(12);
+
+  if (error) throw error;
+  return data;
+};
+
+export const calculateAverageCycleLength = (
+  cycleStarts: { date: string }[]
+) => {
+  if (cycleStarts.length < 2) return null;
+
+  // Calculate cycle lengths
+  const cycleLengths: number[] = [];
+  for (let i = 0; i < cycleStarts.length - 1; i++) {
+    const d1 = new Date(cycleStarts[i].date);
+    const d2 = new Date(cycleStarts[i + 1].date);
+    const length = Math.abs(
+      (d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    cycleLengths.push(length);
+  }
+
+  // Filter out extreme values (e.g., cycles longer than 40 days)
+  const filteredLengths = cycleLengths.filter((length) => length <= 40);
+
+  if (filteredLengths.length === 0) return null;
+
+  // Calculate weighted average (more recent cycles have higher weight)
+  let total = 0;
+  let weightSum = 0;
+  for (let i = 0; i < filteredLengths.length; i++) {
+    const weight = i + 1; // Weight increases with recency
+    total += filteredLengths[i] * weight;
+    weightSum += weight;
+  }
+
+  return Math.round(total / weightSum);
+};

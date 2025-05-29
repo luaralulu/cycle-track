@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { signIn, getCycleData, logPeriod } from "./lib/supabase";
+import {
+  signIn,
+  getCycleData,
+  logPeriod,
+  getLast12CycleStarts,
+  calculateAverageCycleLength,
+} from "./lib/supabase";
 import "./App.css";
 
 function App() {
@@ -8,6 +14,13 @@ function App() {
   const [userId, setUserId] = useState<string | null>(null);
   const [cycleData, setCycleData] = useState<any[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [averageCycleLength, setAverageCycleLength] = useState<number | null>(
+    null
+  );
+  const [nextPeriodStart, setNextPeriodStart] = useState<Date | null>(null);
+  const [pmsWindow, setPmsWindow] = useState<{ start: Date; end: Date } | null>(
+    null
+  );
 
   useEffect(() => {
     const initialize = async () => {
@@ -25,6 +38,25 @@ function App() {
         const data = await getCycleData(user.id);
         console.log("Fetched cycle data:", data); // Debug log
         setCycleData(data);
+
+        // Phase 3: Prediction Engine
+        const cycleStarts = await getLast12CycleStarts(user.id);
+        const avg = calculateAverageCycleLength(cycleStarts);
+        setAverageCycleLength(avg);
+        if (cycleStarts.length > 0 && avg) {
+          const lastStart = new Date(cycleStarts[0].date);
+          const nextStart = new Date(lastStart);
+          nextStart.setDate(lastStart.getDate() + avg);
+          setNextPeriodStart(nextStart);
+          // PMS window: 6–8 days before next period
+          setPmsWindow({
+            start: new Date(nextStart.getTime() - 8 * 24 * 60 * 60 * 1000),
+            end: new Date(nextStart.getTime() - 6 * 24 * 60 * 60 * 1000),
+          });
+        } else {
+          setNextPeriodStart(null);
+          setPmsWindow(null);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -74,6 +106,51 @@ function App() {
           Log Period
         </button>
       )}
+
+      {/* Phase 3: Prediction Engine UI */}
+      <div
+        className="prediction-display"
+        style={{
+          background: "#f0f0f0",
+          padding: "10px",
+          borderRadius: "5px",
+          color: "#333",
+        }}
+      >
+        <h2>Predictions</h2>
+        {averageCycleLength && nextPeriodStart ? (
+          <>
+            <div>Average Cycle Length: {averageCycleLength} days</div>
+            <div>
+              Next Predicted Period: 🩸{" "}
+              {nextPeriodStart.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
+            </div>
+            {pmsWindow && (
+              <div>
+                PMS Window: 🧘‍♀️{" "}
+                {pmsWindow.start.toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}{" "}
+                -{" "}
+                {pmsWindow.end.toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
+              </div>
+            )}
+          </>
+        ) : (
+          <div>Not enough data to predict next period.</div>
+        )}
+      </div>
+
       <div className="data-display">
         <h2>Recent Entries</h2>
         <ul>

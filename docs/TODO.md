@@ -1,4 +1,4 @@
-Here’s your TODO checklist in **Markdown** format, structured in phases from easiest to hardest, with **acceptance criteria** for each item.
+Here's your TODO checklist in **Markdown** format, structured in phases from easiest to hardest, with **acceptance criteria** for each item.
 
 ---
 
@@ -24,7 +24,7 @@ Here’s your TODO checklist in **Markdown** format, structured in phases from e
 - [x] Create a "Log Period" button
       **Acceptance Criteria**: Button is visible and clickable on screen.
 
-- [x] When clicked, insert today’s date with `cycle_day = 1`, `period = true`, and correct `user_id`
+- [x] When clicked, insert today's date with `cycle_day = 1`, `period = true`, and correct `user_id`
       **Acceptance Criteria**: Entry appears in Supabase with today's date and correct values.
 
 - [ ] Recalculate predictions and update calendar view on log
@@ -36,13 +36,13 @@ Here’s your TODO checklist in **Markdown** format, structured in phases from e
 
 ### ⏱️ Daily Cron-Based Data Filler
 
-- [ ] Create script to run via GitHub Actions (or locally)
+- [x] Create script to run via GitHub Actions (or locally)
       **Acceptance Criteria**: Script runs daily and logs output.
 
-- [ ] Check if yesterday’s entry is missing
+- [x] Check if yesterday's entry is missing
       **Acceptance Criteria**: Script detects missing date.
 
-- [ ] If missing, insert:
+- [x] If missing, insert:
 
   - `cycle_day = last + 1`
   - `period = true` if 2–5
@@ -53,13 +53,13 @@ Here’s your TODO checklist in **Markdown** format, structured in phases from e
 
 ## 🔮 Phase 3: Prediction Engine
 
-- [ ] Fetch last 12 `cycle_day = 1` entries to calculate average cycle length
+- [x] Fetch last 12 `cycle_day = 1` entries to calculate average cycle length
       **Acceptance Criteria**: Average cycle length is calculated accurately.
 
-- [ ] Predict next period based on average
+- [x] Predict next period based on average
       **Acceptance Criteria**: Predicted next period appears on the calendar.
 
-- [ ] Calculate PMS window (6–8 days before predicted period start)
+- [x] Calculate PMS window (6–8 days before predicted period start)
       **Acceptance Criteria**: PMS days are correctly marked in data.
 
 ---

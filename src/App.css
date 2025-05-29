@@ -194,3 +194,99 @@ button:disabled {
 .cancel-button:hover {
   background-color: #d0d0d0;
 }
+
+/* Calendar styles */
+.calendar-grid {
+  margin: 2rem auto 1.5rem auto;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 1.5rem 1rem 1rem 1rem;
+}
+.calendar-header {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+.calendar-row {
+  display: flex;
+}
+.calendar-weekdays {
+  margin-bottom: 0.5rem;
+}
+.calendar-cell {
+  flex: 1 0 14%;
+  min-width: 36px;
+  min-height: 36px;
+  text-align: center;
+  padding: 0.2rem 0;
+  position: relative;
+  font-size: 1rem;
+  border-radius: 50%;
+  margin: 2px;
+  transition: background 0.2s;
+}
+.calendar-weekday {
+  font-weight: 500;
+  color: #b0b0b0;
+  background: none;
+  border-radius: 0;
+}
+.calendar-day {
+  background: none;
+  color: #2c3e50;
+}
+.calendar-out {
+  color: #e0e0e0;
+  background: none;
+}
+.calendar-period {
+  background: #ff8fa3;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 143, 163, 0.1);
+}
+.calendar-predicted-period {
+  background: #ffd6e0;
+  color: #ff4d6d;
+  font-weight: 600;
+}
+.calendar-pms {
+  background: #444;
+  color: #fff;
+  font-weight: 600;
+}
+.calendar-cycle-day {
+  font-size: 0.5rem;
+  background: none;
+  color: #2c3e50;
+  border-radius: 8px;
+  padding: 0 4px;
+  margin: 0;
+  position: absolute;
+  top: 2px;
+  left: -4px;
+  z-index: 2;
+  display: inline-block;
+}
+.calendar-period .calendar-cycle-day {
+  background: #ff8fa3;
+  color: #fff;
+}
+.calendar-pms .calendar-cycle-day {
+  background: #fff;
+  color: #444;
+}
+.calendar-date {
+  font-size: 1.1rem;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+.calendar-emoji {
+  font-size: 1.1rem;
+  margin-left: 2px;
+}

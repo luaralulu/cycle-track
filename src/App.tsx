@@ -114,8 +114,8 @@ function App() {
   const getMonthDays = (monthDate: Date) => {
     const monthStart = startOfMonth(monthDate);
     const monthEnd = endOfMonth(monthDate);
-    const weekStart = startOfWeek(monthStart, { weekStartsOn: 0 });
-    const weekEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+    const weekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
     const days: Date[] = [];
     let day = weekStart;
     while (day <= weekEnd) {
@@ -181,7 +181,7 @@ function App() {
       <div className="calendar-grid">
         <div className="calendar-header">{format(monthDate, "MMMM yyyy")}</div>
         <div className="calendar-row calendar-weekdays">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((wd) => (
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((wd) => (
             <div key={wd} className="calendar-cell calendar-weekday">
               {wd}
             </div>
@@ -202,9 +202,11 @@ function App() {
                 <div
                   key={dateStr}
                   className={`calendar-cell calendar-day${
-                    isCurrentMonth ? "" : " calendar-out"
-                  }${isPeriod || isPredictedPeriod ? " calendar-period" : ""}${
-                    isPMS ? " calendar-pms" : ""
+                    isCurrentMonth
+                      ? (isPeriod || isPredictedPeriod
+                          ? " calendar-period"
+                          : "") + (isPMS ? " calendar-pms" : "")
+                      : " calendar-out"
                   }`}
                 >
                   <div className="calendar-date">{date.getDate()}</div>

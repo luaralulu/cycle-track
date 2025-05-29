@@ -203,6 +203,9 @@ button:disabled {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 1.5rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .calendar-header {
   text-align: center;
@@ -213,6 +216,8 @@ button:disabled {
 }
 .calendar-row {
   display: flex;
+  justify-content: center;
+  width: 100%;
 }
 .calendar-weekdays {
   margin-bottom: 0.5rem;
@@ -274,7 +279,7 @@ button:disabled {
   margin: 0;
   position: absolute;
   top: 2px;
-  left: -4px;
+  left: -2px;
   z-index: 2;
   display: inline-block;
 }

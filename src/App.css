@@ -290,3 +290,15 @@ button:disabled {
   font-size: 1.1rem;
   margin-left: 2px;
 }
+.calendar-out .calendar-cycle-day {
+  background: none;
+  color: #e0e0e0;
+}
+
+.prediction-display {
+  background-color: #faf7f7;
+  color: #444;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}

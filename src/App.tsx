@@ -211,15 +211,7 @@ function App() {
       )}
 
       {/* Phase 3: Prediction Engine UI */}
-      <div
-        className="prediction-display"
-        style={{
-          background: "#f0f0f0",
-          padding: "10px",
-          borderRadius: "5px",
-          color: "#333",
-        }}
-      >
+      <div className="prediction-display">
         <h2>Predictions</h2>
         {averageCycleLength && nextPeriodStart ? (
           <>
@@ -252,23 +244,6 @@ function App() {
         ) : (
           <div>Not enough data to predict next period.</div>
         )}
-      </div>
-
-      <div className="data-display">
-        <h2>Recent Entries</h2>
-        <ul>
-          {recentEntries.map((entry) => (
-            <li key={entry.id}>
-              {new Date(entry.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}{" "}
-              - Day {entry.cycle_day}
-              {entry.period && <span className="period-indicator">🩸</span>}
-            </li>
-          ))}
-        </ul>
       </div>
 
       {renderCalendar()}

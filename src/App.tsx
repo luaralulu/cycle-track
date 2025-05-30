@@ -6,19 +6,10 @@ import {
   getLast12CycleStarts,
   calculateAverageCycleLength,
 } from "./lib/supabase";
+import Calendar from "./components/Calendar";
+import Modal from "./components/Modal";
 import "./App.css";
-import {
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  addDays,
-  isSameMonth,
-  isSameDay,
-  format,
-  parseISO,
-  addMonths,
-} from "date-fns";
+import { addDays, format, parseISO, addMonths, isSameMonth } from "date-fns";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -109,21 +100,6 @@ function App() {
   const shouldShowLogButton =
     lastEntry && !lastEntry.period && lastEntry.cycle_day >= 20;
 
-  // Helper: get all days for a given month in a grid
-  const getMonthDays = (monthDate: Date) => {
-    const monthStart = startOfMonth(monthDate);
-    const monthEnd = endOfMonth(monthDate);
-    const weekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-    const days: Date[] = [];
-    let day = weekStart;
-    while (day <= weekEnd) {
-      days.push(day);
-      day = addDays(day, 1);
-    }
-    return days;
-  };
-
   // Helper: get period and PMS days for the month
   const periodDates = new Set(
     cycleData
@@ -166,61 +142,6 @@ function App() {
       d = addDays(d, 1);
     }
     return cycleDay;
-  };
-
-  // Calendar rendering for a given month
-  const renderCalendar = (monthDate: Date) => {
-    const days = getMonthDays(monthDate);
-    // Split days into weeks (arrays of 7)
-    const weeks: Date[][] = [];
-    for (let i = 0; i < days.length; i += 7) {
-      weeks.push(days.slice(i, i + 7));
-    }
-    return (
-      <div className="calendar-grid">
-        <div className="calendar-header">{format(monthDate, "MMMM yyyy")}</div>
-        <div className="calendar-row calendar-weekdays">
-          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((wd) => (
-            <div key={wd} className="calendar-cell calendar-weekday">
-              {wd}
-            </div>
-          ))}
-        </div>
-        {weeks.map((week, wIdx) => (
-          <div className="calendar-row calendar-days" key={wIdx}>
-            {week.map((date) => {
-              const dateStr = format(date, "yyyy-MM-dd");
-              const isCurrentMonth = isSameMonth(date, monthDate);
-              const isPeriod = periodDates.has(dateStr);
-              const isPredictedPeriod =
-                predictedPeriod.has(dateStr) && !isPeriod;
-              const isPMS = predictedPMS.has(dateStr);
-              const cycleDay =
-                cycleDayMap[dateStr] || getPredictedCycleDay(date);
-              return (
-                <div
-                  key={dateStr}
-                  className={`calendar-cell calendar-day${
-                    isCurrentMonth
-                      ? (isPeriod
-                          ? " calendar-period"
-                          : isPredictedPeriod
-                          ? " calendar-predicted-period"
-                          : "") + (isPMS ? " calendar-pms" : "")
-                      : " calendar-out"
-                  }`}
-                >
-                  <div className="calendar-date">{date.getDate()}</div>
-                  {cycleDay && (
-                    <div className="calendar-cycle-day">{cycleDay}</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    );
   };
 
   return (
@@ -268,32 +189,31 @@ function App() {
         )}
       </div>
 
-      {renderCalendar(new Date())}
-      {renderCalendar(addMonths(new Date(), 1))}
+      <Calendar
+        monthDate={new Date()}
+        cycleData={cycleData}
+        periodDates={periodDates}
+        cycleDayMap={cycleDayMap}
+        predictedPMS={predictedPMS}
+        predictedPeriod={predictedPeriod}
+        getPredictedCycleDay={getPredictedCycleDay}
+      />
+      <Calendar
+        monthDate={addMonths(new Date(), 1)}
+        cycleData={cycleData}
+        periodDates={periodDates}
+        cycleDayMap={cycleDayMap}
+        predictedPMS={predictedPMS}
+        predictedPeriod={predictedPeriod}
+        getPredictedCycleDay={getPredictedCycleDay}
+      />
 
-      {showConfirmModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Confirm Period Log</h3>
-            <p>Are you sure you want to log your period for today?</p>
-            <div className="modal-buttons">
-              <button
-                onClick={handleLogPeriod}
-                disabled={isLoading}
-                className="confirm-button"
-              >
-                Yes, log period
-              </button>
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="cancel-button"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={showConfirmModal}
+        onConfirm={handleLogPeriod}
+        onCancel={() => setShowConfirmModal(false)}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

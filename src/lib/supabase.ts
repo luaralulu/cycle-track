@@ -9,6 +9,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export interface CycleData {
+  id: number;
+  user_id: string;
+  date: string; // ISO date string (yyyy-MM-dd)
+  cycle_day: number;
+  period: boolean;
+}
+
 export const signIn = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -19,7 +27,7 @@ export const signIn = async (email: string, password: string) => {
   return data;
 };
 
-export const getCycleData = async (userId: string) => {
+export const getCycleData = async (userId: string): Promise<CycleData[]> => {
   const { data, error } = await supabase
     .from("cycle_data")
     .select("*")
@@ -27,10 +35,10 @@ export const getCycleData = async (userId: string) => {
     .order("date", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data as CycleData[];
 };
 
-export const logPeriod = async (userId: string) => {
+export const logPeriod = async (userId: string): Promise<CycleData[]> => {
   const today = new Date().toISOString().split("T")[0];
 
   const { data, error } = await supabase
@@ -46,10 +54,12 @@ export const logPeriod = async (userId: string) => {
     .select();
 
   if (error) throw error;
-  return data;
+  return data as CycleData[];
 };
 
-export const getLast12CycleStarts = async (userId: string) => {
+export const getLast12CycleStarts = async (
+  userId: string
+): Promise<{ date: string }[]> => {
   const { data, error } = await supabase
     .from("cycle_data")
     .select("date")
@@ -59,7 +69,7 @@ export const getLast12CycleStarts = async (userId: string) => {
     .limit(12);
 
   if (error) throw error;
-  return data;
+  return data as { date: string }[];
 };
 
 export const calculateAverageCycleLength = (

@@ -7,12 +7,13 @@ import {
   calculateAverageCycleLength,
 } from "../lib/supabase";
 import { addDays, format, parseISO, addMonths } from "date-fns";
+import type { CycleData } from "../lib/supabase";
 
 export function useCycleData() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [cycleData, setCycleData] = useState<any[]>([]);
+  const [cycleData, setCycleData] = useState<CycleData[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [averageCycleLength, setAverageCycleLength] = useState<number | null>(
     null

@@ -32,12 +32,12 @@ This checklist highlights areas for improvement in the codebase, focusing on sec
 - [x] **File Organization**
   - [x] Group related files (components, hooks, utils) into folders
   - [x] Separate business logic from UI components
-- [ ] **Component Design**
-  - [ ] Break up large components (e.g., App.tsx) into smaller, reusable components
-  - [ ] Use hooks for shared logic (e.g., data fetching, modal state)
-- [ ] **Type Safety**
-  - [ ] Define and use TypeScript interfaces/types for all data structures
-  - [ ] Avoid using `any` in favor of explicit types
+- [x] **Component Design**
+  - [x] Break up large components (e.g., App.tsx) into smaller, reusable components
+  - [x] Use hooks for shared logic (e.g., data fetching, modal state)
+- [x] **Type Safety**
+  - [x] Define and use TypeScript interfaces/types for all data structures
+  - [x] Avoid using `any` in favor of explicit types
 
 ## Best Practices
 

@@ -8,6 +8,7 @@ import {
   logPeriod,
   signIn,
 } from "./supabase";
+import type { CycleData } from "./supabase";
 
 describe("Supabase Functions", () => {
   beforeEach(() => {
@@ -46,6 +47,7 @@ describe("Supabase Functions", () => {
     it("should call signIn with correct parameters", async () => {
       const email = "test@example.com";
       const password = "password123";
+      // @ts-expect-error: test mock return type
       const mockData = { user: { id: "123" }, session: null };
       const mockSignIn = vi
         .spyOn(supabase.auth, "signInWithPassword")
@@ -71,9 +73,12 @@ describe("Supabase Functions", () => {
         .mockResolvedValue({ data: mockData, error: null });
       const mockEq = vi.fn().mockReturnValue({ order: mockOrder });
       const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
+      // @ts-expect-error: test mock return type
       const mockFrom = vi
         .spyOn(supabase, "from")
-        .mockReturnValue({ select: mockSelect } as any);
+        .mockReturnValue({ select: mockSelect } as unknown as {
+          select: typeof mockSelect;
+        });
       const result = await getCycleData(userId);
       expect(mockFrom).toHaveBeenCalledWith("cycle_data");
       expect(mockSelect).toHaveBeenCalledWith("*");
@@ -92,9 +97,12 @@ describe("Supabase Functions", () => {
         .fn()
         .mockResolvedValue({ data: mockData, error: null });
       const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
+      // @ts-expect-error: test mock return type
       const mockFrom = vi
         .spyOn(supabase, "from")
-        .mockReturnValue({ insert: mockInsert } as any);
+        .mockReturnValue({ insert: mockInsert } as unknown as {
+          insert: typeof mockInsert;
+        });
       const result = await logPeriod(userId);
       expect(mockFrom).toHaveBeenCalledWith("cycle_data");
       expect(mockInsert).toHaveBeenCalledWith([
@@ -114,9 +122,12 @@ describe("Supabase Functions", () => {
       const mockEq2 = vi.fn().mockReturnValue({ order: mockOrder });
       const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 });
       const mockSelect = vi.fn().mockReturnValue({ eq: mockEq1 });
+      // @ts-expect-error: test mock return type
       const mockFrom = vi
         .spyOn(supabase, "from")
-        .mockReturnValue({ select: mockSelect } as any);
+        .mockReturnValue({ select: mockSelect } as unknown as {
+          select: typeof mockSelect;
+        });
       const result = await getLast12CycleStarts(userId);
       expect(mockFrom).toHaveBeenCalledWith("cycle_data");
       expect(mockSelect).toHaveBeenCalledWith("date");

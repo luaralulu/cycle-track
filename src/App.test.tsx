@@ -3,6 +3,8 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import App from "./App";
 import * as supabase from "./lib/supabase";
+import type { CycleData } from "./lib/supabase";
+import type { User, Session } from "@supabase/supabase-js";
 
 // Mock the supabase functions
 vi.mock("./lib/supabase", () => ({
@@ -32,8 +34,9 @@ describe("App Component", () => {
   });
 
   it("renders cycle data and predictions after successful initialization", async () => {
-    const mockUser = { id: "123" } as any;
-    const mockCycleData = [
+    // @ts-expect-error: mock user for testing
+    const mockUser = { id: "123" } as User;
+    const mockCycleData: CycleData[] = [
       { id: 1, user_id: "123", date: "2023-01-01", cycle_day: 1, period: true },
     ];
     const mockCycleStarts = [{ date: "2023-01-01" }, { date: "2023-02-01" }];
@@ -41,7 +44,8 @@ describe("App Component", () => {
 
     vi.mocked(supabase.signIn).mockResolvedValue({
       user: mockUser,
-      session: {} as any,
+      // @ts-expect-error: mock session for testing
+      session: {} as Session,
     });
     vi.mocked(supabase.getCycleData).mockResolvedValue(mockCycleData);
     vi.mocked(supabase.getLast12CycleStarts).mockResolvedValue(mockCycleStarts);
@@ -60,8 +64,9 @@ describe("App Component", () => {
   });
 
   it("logs period when Log Period button is clicked", async () => {
-    const mockUser = { id: "123" } as any;
-    const mockCycleData = [
+    // @ts-expect-error: mock user for testing
+    const mockUser = { id: "123" } as User;
+    const mockCycleData: CycleData[] = [
       {
         id: 1,
         user_id: "123",
@@ -73,13 +78,14 @@ describe("App Component", () => {
     ];
     const mockCycleStarts = [{ date: "2023-01-01" }, { date: "2023-02-01" }];
     const mockAvgCycleLength = 28;
-    const mockNewEntry = [
+    const mockNewEntry: CycleData[] = [
       { id: 3, user_id: "123", date: "2023-03-01", cycle_day: 1, period: true },
     ];
 
     vi.mocked(supabase.signIn).mockResolvedValue({
       user: mockUser,
-      session: {} as any,
+      // @ts-expect-error: mock session for testing
+      session: {} as Session,
     });
     vi.mocked(supabase.getCycleData).mockResolvedValue(mockCycleData);
     vi.mocked(supabase.getLast12CycleStarts).mockResolvedValue(mockCycleStarts);

@@ -1,9 +1,10 @@
 import React from "react";
 import { format, isSameMonth, addDays, parseISO } from "date-fns";
+import type { CycleData } from "../lib/supabase";
 
 interface CalendarProps {
   monthDate: Date;
-  cycleData: any[];
+  cycleData: CycleData[];
   periodDates: Set<string>;
   cycleDayMap: Record<string, number>;
   predictedPMS: Set<string>;

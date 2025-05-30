@@ -34,7 +34,6 @@ describe("App Component", () => {
   });
 
   it("renders cycle data and predictions after successful initialization", async () => {
-    // @ts-expect-error: mock user for testing
     const mockUser = { id: "123" } as User;
     const mockCycleData: CycleData[] = [
       { id: 1, user_id: "123", date: "2023-01-01", cycle_day: 1, period: true },
@@ -44,7 +43,6 @@ describe("App Component", () => {
 
     vi.mocked(supabase.signIn).mockResolvedValue({
       user: mockUser,
-      // @ts-expect-error: mock session for testing
       session: {} as Session,
     });
     vi.mocked(supabase.getCycleData).mockResolvedValue(mockCycleData);
@@ -64,7 +62,6 @@ describe("App Component", () => {
   });
 
   it("logs period when Log Period button is clicked", async () => {
-    // @ts-expect-error: mock user for testing
     const mockUser = { id: "123" } as User;
     const mockCycleData: CycleData[] = [
       {
@@ -84,7 +81,6 @@ describe("App Component", () => {
 
     vi.mocked(supabase.signIn).mockResolvedValue({
       user: mockUser,
-      // @ts-expect-error: mock session for testing
       session: {} as Session,
     });
     vi.mocked(supabase.getCycleData).mockResolvedValue(mockCycleData);

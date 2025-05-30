@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   signIn,
   getCycleData,
@@ -6,7 +6,7 @@ import {
   getLast12CycleStarts,
   calculateAverageCycleLength,
 } from "../lib/supabase";
-import { addDays, format, parseISO, addMonths } from "date-fns";
+import { addDays, format, parseISO } from "date-fns";
 import type { CycleData } from "../lib/supabase";
 
 export function useCycleData() {
@@ -83,31 +83,57 @@ export function useCycleData() {
   };
 
   // Helper: get period and PMS days for the month
-  const periodDates = new Set(
-    cycleData
-      .filter((e) => e.period)
-      .map((e) => format(parseISO(e.date), "yyyy-MM-dd"))
+  const periodDates = useMemo(
+    () =>
+      new Set(
+        cycleData
+          .filter((e) => e.period)
+          .map((e) => format(parseISO(e.date), "yyyy-MM-dd"))
+      ),
+    [cycleData]
   );
-  const cycleDayMap = Object.fromEntries(
-    cycleData.map((e) => [format(parseISO(e.date), "yyyy-MM-dd"), e.cycle_day])
+
+  const cycleDayMap = useMemo(
+    () =>
+      Object.fromEntries(
+        cycleData.map((e) => [
+          format(parseISO(e.date), "yyyy-MM-dd"),
+          e.cycle_day,
+        ])
+      ),
+    [cycleData]
   );
-  // Predicted PMS days
-  let predictedPMS = new Set<string>();
-  if (pmsWindow && nextPeriodStart) {
-    let d = pmsWindow.start;
-    while (d <= pmsWindow.end) {
-      predictedPMS.add(format(d, "yyyy-MM-dd"));
-      d = addDays(d, 1);
+
+  const predictedPMS = useMemo(() => {
+    const pms = new Set<string>();
+    if (pmsWindow && nextPeriodStart) {
+      let d = pmsWindow.start;
+      while (d <= pmsWindow.end) {
+        pms.add(format(d, "yyyy-MM-dd"));
+        d = addDays(d, 1);
+      }
     }
-  }
-  // Predicted period days
-  let predictedPeriod = new Set<string>();
-  if (nextPeriodStart) {
-    for (let i = 0; i < 5; i++) {
-      const d = addDays(nextPeriodStart, i);
-      predictedPeriod.add(format(d, "yyyy-MM-dd"));
+    return pms;
+  }, [pmsWindow, nextPeriodStart]);
+
+  const predictedPeriod = useMemo(() => {
+    const period = new Set<string>();
+    if (nextPeriodStart) {
+      for (let i = 0; i < 5; i++) {
+        const d = addDays(nextPeriodStart, i);
+        period.add(format(d, "yyyy-MM-dd"));
+      }
     }
-  }
+    return period;
+  }, [nextPeriodStart]);
+
+  // Get the 5 most recent entries
+  const recentEntries = useMemo(() => cycleData.slice(0, 5), [cycleData]);
+
+  // Check if we should show the Log Period button
+  const lastEntry = cycleData[0]; // Most recent entry
+  const shouldShowLogButton =
+    lastEntry && !lastEntry.period && lastEntry.cycle_day >= 20;
 
   // Predict cycle days for future dates
   const getPredictedCycleDay = (date: Date) => {
@@ -125,14 +151,6 @@ export function useCycleData() {
     }
     return cycleDay;
   };
-
-  // Get the 5 most recent entries
-  const recentEntries = cycleData.slice(0, 5);
-
-  // Check if we should show the Log Period button
-  const lastEntry = cycleData[0]; // Most recent entry
-  const shouldShowLogButton =
-    lastEntry && !lastEntry.period && lastEntry.cycle_day >= 20;
 
   return {
     isLoading,

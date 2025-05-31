@@ -87,14 +87,14 @@
 - [x] Add login screen using Supabase email/password auth  
        **Acceptance Criteria**: User sees login form on app load and can submit credentials.
 
-- [ ] Prevent access to main app until logged in  
+- [x] Prevent access to main app until logged in  
        **Acceptance Criteria**: Redirects to login if user is not authenticated; authenticated users see the full app.
 
-- [ ] Store and reuse Supabase session token  
+- [x] Store and reuse Supabase session token  
        **Acceptance Criteria**: Logged-in state persists across refreshes (until token expires).
 
-- [ ] Add logout button to clear session  
+- [x] Add logout button to clear session  
        **Acceptance Criteria**: Clicking "Logout" returns user to login screen and clears session.
 
-- [ ] Hide "Log Period" and calendar UI when logged out  
+- [x] Hide "Log Period" and calendar UI when logged out  
        **Acceptance Criteria**: All data-related features are fully inaccessible until logged in.

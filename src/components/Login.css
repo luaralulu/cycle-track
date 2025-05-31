@@ -83,3 +83,30 @@
   margin-top: -0.5rem;
   margin-bottom: 0.5rem;
 }
+
+@media (max-width: 480px) {
+  .login-card {
+    min-width: 0;
+    width: 100vw;
+    max-width: 100vw;
+    padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+  }
+  .login-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  .login-label {
+    font-size: 0.98rem;
+  }
+  .login-input {
+    font-size: 1rem;
+    padding: 0.7rem 0.7rem;
+  }
+  .login-btn {
+    font-size: 1.1rem;
+    padding: 0.8rem 0;
+    border-radius: 14px;
+  }
+}

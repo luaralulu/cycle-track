@@ -16,6 +16,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, loading, error }) => {
     await onLogin(email, password);
   };
 
+  const isDisabled = loading || !email || !password;
+
   return (
     <div className="login-bg">
       <form className="login-card" onSubmit={handleSubmit}>
@@ -42,7 +44,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, loading, error }) => {
           />
         </label>
         {error && <div className="login-error">{error}</div>}
-        <button type="submit" className="login-btn" disabled={loading}>
+        <button type="submit" className="login-btn" disabled={isDisabled}>
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>

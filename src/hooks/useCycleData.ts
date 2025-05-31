@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-  signIn,
   getCycleData,
   logPeriod,
   getLast12CycleStarts,
@@ -9,10 +8,9 @@ import {
 import { addDays, format, parseISO } from "date-fns";
 import type { CycleData } from "../lib/supabase";
 
-export function useCycleData() {
+export function useCycleData(userId?: string | null) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [cycleData, setCycleData] = useState<CycleData[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [averageCycleLength, setAverageCycleLength] = useState<number | null>(
@@ -24,23 +22,18 @@ export function useCycleData() {
   );
 
   useEffect(() => {
+    if (!userId) {
+      setIsLoading(false);
+      setCycleData([]);
+      return;
+    }
     const initialize = async () => {
       try {
-        const email = import.meta.env.VITE_SUPABASE_USER_EMAIL;
-        const password = import.meta.env.VITE_SUPABASE_USER_PASSWORD;
-
-        if (!email || !password) {
-          throw new Error("Missing user credentials in environment variables");
-        }
-
-        const { user } = await signIn(email, password);
-        setUserId(user.id);
-
-        const data = await getCycleData(user.id);
+        const data = await getCycleData(userId);
         setCycleData(data);
 
         // Phase 3: Prediction Engine
-        const cycleStarts = await getLast12CycleStarts(user.id);
+        const cycleStarts = await getLast12CycleStarts(userId);
         const avg = calculateAverageCycleLength(cycleStarts);
         setAverageCycleLength(avg);
         if (cycleStarts.length > 0 && avg) {
@@ -63,13 +56,11 @@ export function useCycleData() {
         setIsLoading(false);
       }
     };
-
     initialize();
-  }, []);
+  }, [userId]);
 
   const handleLogPeriod = async () => {
     if (!userId) return;
-
     try {
       setIsLoading(true);
       const newEntry = await logPeriod(userId);

@@ -15,7 +15,8 @@ function App() {
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Always call the hook to follow the Rules of Hooks
-  const cycleDataState = useCycleData();
+  const userId = session?.user?.id ?? null;
+  const cycleDataState = useCycleData(userId);
 
   useEffect(() => {
     getSession().then(({ data }) => {

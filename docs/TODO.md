@@ -84,7 +84,7 @@
 
 ### 🔑 User Login Flow
 
-- [ ] Add login screen using Supabase email/password auth  
+- [x] Add login screen using Supabase email/password auth  
        **Acceptance Criteria**: User sees login form on app load and can submit credentials.
 
 - [ ] Prevent access to main app until logged in  

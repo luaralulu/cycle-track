@@ -1,7 +1,3 @@
-Here is the full, updated software specification in Markdown:
-
----
-
 # Menstrual Cycle Tracker – Software Specification
 
 ## Overview
@@ -11,6 +7,17 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
 ---
 
 ## Features
+
+### 🔐 User Authentication (Login Only)
+
+- Only accessible to logged-in users
+- App shows **login screen** by default
+- User must authenticate via **Supabase email/password login**
+- No account creation from the UI
+- Credentials are configured via environment or seeded manually
+- Once logged in, user session is cached and used for database access
+
+---
 
 ### 🔴 Period Logging
 
@@ -24,17 +31,21 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
 
   - Automatically updates cycle predictions and calendar display
 
+---
+
 ### ⏱️ Cron-Based Data Filler
 
 - Runs daily as a cron job
 - Checks if **yesterday's** data exists
 - If missing, inserts a new row:
 
-  - `cycle_day` = last known + 1
+  - `cycle_day = last known + 1`
   - `period = true` if `cycle_day` in \[2, 3, 4, 5]
   - `period = false` if `cycle_day >= 6`
 
 - Authenticates with Supabase using email and password from `.env`
+
+---
 
 ### 🔮 Prediction Algorithm
 
@@ -46,9 +57,11 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
 
 - Predicted values are marked in the calendar UI
 
+---
+
 ### 📅 Calendar UI
 
-- Month grid layout (similar to Flo app: calendar-flo.jpeg in /docs/ folder)
+- Month grid layout (similar to Flo app)
 - Smooth and intuitive animations for:
 
   - Month transitions
@@ -69,7 +82,7 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
 | Layer            | Technology                                   |
 | ---------------- | -------------------------------------------- |
 | Frontend         | React + TypeScript + Vite                    |
-| Backend/Auth     | Supabase (Auth with `.env` credentials)      |
+| Backend/Auth     | Supabase (Auth with email/password)          |
 | Cron Jobs        | GitHub Actions                               |
 | Styling/UX       | Tailwind CSS or CSS-in-JS                    |
 | Calendar Display | Custom grid or library like `react-calendar` |
@@ -99,14 +112,15 @@ create table public.cycle_data (
 ```env
 SUPABASE_URL=<your-supabase-url>
 SUPABASE_ANON_KEY=<your-anon-key>
-SUPABASE_USER_EMAIL=<your-user-email>
-SUPABASE_USER_PASSWORD=<your-user-password>
+SUPABASE_USER_EMAIL=<your-login-email>
+SUPABASE_USER_PASSWORD=<your-login-password>
 ```
 
 ---
 
 ## Notes
 
-- Single-user use only (no login interface)
+- Must be logged in to access the app
+- No registration flow exposed to users
 - Should be mobile-friendly
 - No offline support or PWA needed at this stage

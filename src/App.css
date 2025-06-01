@@ -1,7 +1,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 2rem;
   text-align: center;
   background-color: #faf7f7; /* Soft off-white with a hint of pink */
 }
@@ -368,4 +368,48 @@ body,
     top: 0px;
     left: -6px;
   }
+  .login-bg {
+    background: none;
+  }
+}
+
+.app-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  height: 60px;
+}
+
+.app-header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  letter-spacing: -1px;
+}
+
+.logout-btn {
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(255, 143, 163, 0.08);
+  cursor: pointer;
+  transition: background 0.18s;
+  padding: 0;
+}
+.logout-btn:hover {
+  background: #ffe3ea;
+  /* No transform or box-shadow change to prevent movement */
+}
+
+.logout-btn svg {
+  display: block;
 }

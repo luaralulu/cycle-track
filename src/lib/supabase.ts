@@ -104,3 +104,11 @@ export const calculateAverageCycleLength = (
 
   return Math.round(total / weightSum);
 };
+
+export const getSession = async () => {
+  return supabase.auth.getSession();
+};
+
+export const signOut = async () => {
+  return supabase.auth.signOut();
+};

@@ -1,5 +1,5 @@
 import React from "react";
-import { format, isSameMonth, addDays, parseISO } from "date-fns";
+import { format, isSameMonth, addDays } from "date-fns";
 import type { CycleData } from "../lib/supabase";
 
 interface CalendarProps {

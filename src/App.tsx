@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCycleData } from "./hooks/useCycleData";
+import { useMultiMonthNavigation } from "./hooks/useInfiniteMonths";
 import Calendar from "./components/Calendar";
 import Modal from "./components/Modal";
 import Predictions from "./components/Predictions";
@@ -7,7 +8,6 @@ import Login from "./components/Login";
 import { getSession, signIn, signOut, supabase } from "./lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 import "./App.css";
-import { addMonths } from "date-fns";
 
 /**
  * AppHeader Component
@@ -52,6 +52,16 @@ function App() {
   // Get user ID from session and initialize cycle data hook
   const userId = session?.user?.id ?? null;
   const cycleDataState = useCycleData(userId);
+
+  // Initialize multi-month navigation
+  const {
+    months,
+    isLoadingPrevious,
+    canLoadMorePrevious,
+    scrollContainerRef,
+    loadPreviousMonth,
+    getCycleDataForMonth: getMonthData,
+  } = useMultiMonthNavigation(userId);
 
   /**
    * Effect to handle authentication state
@@ -159,27 +169,62 @@ function App() {
         pmsWindow={pmsWindow}
       />
 
-      {/* Current month calendar */}
-      <Calendar
-        monthDate={new Date()}
-        cycleData={[]}
-        periodDates={periodDates}
-        cycleDayMap={cycleDayMap}
-        predictedPMS={predictedPMS}
-        predictedPeriod={predictedPeriod}
-        getPredictedCycleDay={getPredictedCycleDay}
-      />
+      {/* Container for multiple months */}
+      <div
+        ref={scrollContainerRef}
+        className="calendar-container"
+        style={{
+          padding: "16px",
+        }}
+      >
+        {/* Load Previous Month Button */}
+        {canLoadMorePrevious && (
+          <div style={{ textAlign: "center", marginBottom: "16px" }}>
+            <button
+              onClick={loadPreviousMonth}
+              disabled={isLoadingPrevious}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: isLoadingPrevious ? "#ccc" : "#ff8fa3",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: isLoadingPrevious ? "not-allowed" : "pointer",
+              }}
+            >
+              {isLoadingPrevious ? "Loading..." : "Load Previous Month"}
+            </button>
+          </div>
+        )}
 
-      {/* Next month calendar */}
-      <Calendar
-        monthDate={addMonths(new Date(), 1)}
-        cycleData={[]}
-        periodDates={periodDates}
-        cycleDayMap={cycleDayMap}
-        predictedPMS={predictedPMS}
-        predictedPeriod={predictedPeriod}
-        getPredictedCycleDay={getPredictedCycleDay}
-      />
+        {/* Render all months */}
+        {months.map((monthDate, index) => (
+          <Calendar
+            key={`${monthDate.getFullYear()}-${monthDate.getMonth()}`}
+            monthDate={monthDate}
+            cycleData={getMonthData(monthDate)}
+            periodDates={periodDates}
+            cycleDayMap={cycleDayMap}
+            predictedPMS={predictedPMS}
+            predictedPeriod={predictedPeriod}
+            getPredictedCycleDay={getPredictedCycleDay}
+          />
+        ))}
+
+        {/* Info about maximum history reached */}
+        {!canLoadMorePrevious && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "16px",
+              color: "#999",
+              fontSize: "14px",
+            }}
+          >
+            Reached maximum history (6 months back)
+          </div>
+        )}
+      </div>
 
       {/* Modal for confirming period logging */}
       <Modal

@@ -75,9 +75,6 @@
 - [x] Show cycle day for each date
       **Acceptance Criteria**: Cycle day is clearly displayed inside day cell.
 
-- [ ] Click a day to manually edit `period` or `cycle_day`
-      **Acceptance Criteria**: Click opens a modal or inline editor; changes are saved to Supabase.
-
 ---
 
 ## 🔐 Phase 5: Login Authentication
@@ -98,3 +95,25 @@
 
 - [x] Hide "Log Period" and calendar UI when logged out  
        **Acceptance Criteria**: All data-related features are fully inaccessible until logged in.
+
+---
+
+## 🆕 Phase 6: Multi-Month Navigation
+
+- [x] Render **current month + next month** on login  
+       **Acceptance Criteria**: Two stacked month grids are visible immediately after successful login.
+
+- [x] Add **"Load Previous Month" button** at the top of the calendar container  
+       **Acceptance Criteria**: Button is visible and clickable; button shows loading state when fetching data.
+
+- [x] **Fetch previous month** from Supabase and prepend when button is clicked (limit = 6 months back)  
+       **Acceptance Criteria**: Clicking button prepends exactly one month's grid with correct historical data; button becomes disabled once six past months have loaded.
+
+- [ ] Add **"Load Next Month" button** at the bottom of the calendar container  
+       **Acceptance Criteria**: Button is visible and clickable; generates prediction data for future months.
+
+- [ ] **Generate next month** via prediction engine and append when button is clicked (limit = 3 months ahead)  
+       **Acceptance Criteria**: Clicking button appends one month's grid using prediction data; button becomes disabled after three future months are displayed.
+
+- [ ] Add **fade/slide-in animation** for month entry  
+       **Acceptance Criteria**: New month grids appear with a smooth transition; no jarring jump is observed.

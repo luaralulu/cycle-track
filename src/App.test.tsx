@@ -14,6 +14,7 @@ vi.mock("./lib/supabase", () => ({
   getLast12CycleStarts: vi.fn(),
   calculateAverageCycleLength: vi.fn(),
   getSession: vi.fn(),
+  getCycleDataForMonth: vi.fn(),
   supabase: {
     auth: {
       getSession: vi.fn(),

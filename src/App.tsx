@@ -9,6 +9,11 @@ import type { Session } from "@supabase/supabase-js";
 import "./App.css";
 import { addMonths } from "date-fns";
 
+/**
+ * AppHeader Component
+ * Displays the application header with title and logout button
+ * @param onLogout - Function to handle user logout
+ */
 function AppHeader({ onLogout }: { onLogout: () => void }) {
   return (
     <header className="app-header">
@@ -34,15 +39,25 @@ function AppHeader({ onLogout }: { onLogout: () => void }) {
   );
 }
 
+/**
+ * Main App Component
+ * Handles authentication, cycle data management, and renders the main UI
+ */
 function App() {
+  // Authentication state
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Always call the hook to follow the Rules of Hooks
+  // Get user ID from session and initialize cycle data hook
   const userId = session?.user?.id ?? null;
   const cycleDataState = useCycleData(userId);
 
+  /**
+   * Effect to handle authentication state
+   * - Checks for existing session on mount
+   * - Sets up listener for auth state changes
+   */
   useEffect(() => {
     getSession().then(({ data }) => {
       setSession(data.session);
@@ -59,6 +74,11 @@ function App() {
     };
   }, []);
 
+  /**
+   * Handles user login
+   * @param email - User's email
+   * @param password - User's password
+   */
   const handleLogin = async (email: string, password: string) => {
     setAuthLoading(true);
     setAuthError(null);
@@ -72,21 +92,27 @@ function App() {
     }
   };
 
+  /**
+   * Handles user logout
+   */
   const handleLogout = async () => {
     await signOut();
     setSession(null);
   };
 
+  // Show loading state while checking authentication
   if (authLoading) {
     return <div>Loading...</div>;
   }
+
+  // Show login screen if not authenticated
   if (!session) {
     return (
       <Login onLogin={handleLogin} loading={authLoading} error={authError} />
     );
   }
 
-  // Only use cycleDataState when logged in
+  // Destructure cycle data state for easier access
   const {
     isLoading,
     error,
@@ -104,29 +130,36 @@ function App() {
     shouldShowLogButton,
   } = cycleDataState;
 
+  // Show loading state while fetching cycle data
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
+  // Show error state if cycle data fetch failed
   if (error) {
     return <div>Error: {error}</div>;
   }
 
+  // Main app UI
   return (
     <div className="app">
       <AppHeader onLogout={handleLogout} />
+
+      {/* Period logging button - only shown when appropriate */}
       {shouldShowLogButton && (
         <button onClick={() => setShowConfirmModal(true)} disabled={isLoading}>
           Log Period
         </button>
       )}
 
+      {/* Display cycle predictions and statistics */}
       <Predictions
         averageCycleLength={averageCycleLength}
         nextPeriodStart={nextPeriodStart}
         pmsWindow={pmsWindow}
       />
 
+      {/* Current month calendar */}
       <Calendar
         monthDate={new Date()}
         cycleData={[]}
@@ -136,6 +169,8 @@ function App() {
         predictedPeriod={predictedPeriod}
         getPredictedCycleDay={getPredictedCycleDay}
       />
+
+      {/* Next month calendar */}
       <Calendar
         monthDate={addMonths(new Date(), 1)}
         cycleData={[]}
@@ -146,6 +181,7 @@ function App() {
         getPredictedCycleDay={getPredictedCycleDay}
       />
 
+      {/* Modal for confirming period logging */}
       <Modal
         isOpen={showConfirmModal}
         onConfirm={handleLogPeriod}

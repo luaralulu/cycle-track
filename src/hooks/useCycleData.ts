@@ -8,11 +8,19 @@ import {
 import { addDays, format, parseISO } from "date-fns";
 import type { CycleData } from "../lib/supabase";
 
+/**
+ * Custom hook for managing menstrual cycle data
+ * Handles data fetching, period logging, and cycle predictions
+ * @param userId - The current user's ID
+ */
 export function useCycleData(userId?: string | null) {
+  // State management for cycle data and UI
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cycleData, setCycleData] = useState<CycleData[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Prediction-related state
   const [averageCycleLength, setAverageCycleLength] = useState<number | null>(
     null
   );
@@ -21,6 +29,10 @@ export function useCycleData(userId?: string | null) {
     null
   );
 
+  /**
+   * Initialize cycle data and calculate predictions
+   * Runs when userId changes
+   */
   useEffect(() => {
     if (!userId) {
       setIsLoading(false);
@@ -29,19 +41,23 @@ export function useCycleData(userId?: string | null) {
     }
     const initialize = async () => {
       try {
+        // Fetch user's cycle data
         const data = await getCycleData(userId);
         setCycleData(data);
 
-        // Phase 3: Prediction Engine
+        // Calculate predictions based on historical data
         const cycleStarts = await getLast12CycleStarts(userId);
         const avg = calculateAverageCycleLength(cycleStarts);
         setAverageCycleLength(avg);
+
         if (cycleStarts.length > 0 && avg) {
+          // Calculate next period start date
           const lastStart = new Date(cycleStarts[0].date);
           const nextStart = new Date(lastStart);
           nextStart.setDate(lastStart.getDate() + avg);
           setNextPeriodStart(nextStart);
-          // PMS window: 6–8 days before next period
+
+          // Calculate PMS window (6-8 days before next period)
           setPmsWindow({
             start: new Date(nextStart.getTime() - 8 * 24 * 60 * 60 * 1000),
             end: new Date(nextStart.getTime() - 6 * 24 * 60 * 60 * 1000),
@@ -59,6 +75,10 @@ export function useCycleData(userId?: string | null) {
     initialize();
   }, [userId]);
 
+  /**
+   * Handles logging a new period entry
+   * Updates local state and triggers recalculation of predictions
+   */
   const handleLogPeriod = async () => {
     if (!userId) return;
     try {
@@ -73,7 +93,10 @@ export function useCycleData(userId?: string | null) {
     }
   };
 
-  // Helper: get period and PMS days for the month
+  /**
+   * Memoized set of dates when user had their period
+   * Used for calendar display
+   */
   const periodDates = useMemo(
     () =>
       new Set(
@@ -84,6 +107,10 @@ export function useCycleData(userId?: string | null) {
     [cycleData]
   );
 
+  /**
+   * Memoized map of cycle days for each date
+   * Used for tracking cycle progress
+   */
   const cycleDayMap = useMemo(
     () =>
       Object.fromEntries(
@@ -95,6 +122,10 @@ export function useCycleData(userId?: string | null) {
     [cycleData]
   );
 
+  /**
+   * Memoized set of predicted PMS dates
+   * Calculated based on next period prediction
+   */
   const predictedPMS = useMemo(() => {
     const pms = new Set<string>();
     if (pmsWindow && nextPeriodStart) {
@@ -107,6 +138,10 @@ export function useCycleData(userId?: string | null) {
     return pms;
   }, [pmsWindow, nextPeriodStart]);
 
+  /**
+   * Memoized set of predicted period dates
+   * Assumes 5-day period duration
+   */
   const predictedPeriod = useMemo(() => {
     const period = new Set<string>();
     if (nextPeriodStart) {
@@ -118,15 +153,23 @@ export function useCycleData(userId?: string | null) {
     return period;
   }, [nextPeriodStart]);
 
-  // Get the 5 most recent entries
+  // Get the 5 most recent entries for quick reference
   const recentEntries = useMemo(() => cycleData.slice(0, 5), [cycleData]);
 
-  // Check if we should show the Log Period button
+  /**
+   * Determines if the Log Period button should be shown
+   * Only shown when user is in the latter part of their cycle
+   */
   const lastEntry = cycleData[0]; // Most recent entry
   const shouldShowLogButton =
     lastEntry && !lastEntry.period && lastEntry.cycle_day >= 20;
 
-  // Predict cycle days for future dates
+  /**
+   * Predicts cycle day for a given date
+   * Uses average cycle length and last known cycle start
+   * @param date - The date to predict cycle day for
+   * @returns Predicted cycle day or null if prediction not possible
+   */
   const getPredictedCycleDay = (date: Date) => {
     if (!nextPeriodStart || !averageCycleLength) return null;
     // Find the last logged cycle start

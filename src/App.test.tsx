@@ -13,11 +13,32 @@ vi.mock("./lib/supabase", () => ({
   logPeriod: vi.fn(),
   getLast12CycleStarts: vi.fn(),
   calculateAverageCycleLength: vi.fn(),
+  getSession: vi.fn(),
+  supabase: {
+    auth: {
+      getSession: vi.fn(),
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
+      signOut: vi.fn(),
+    },
+  },
+  signOut: vi.fn(),
 }));
 
 describe("App Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Set default mock for getSession to return no session
+    vi.mocked(supabase.getSession).mockResolvedValue({
+      data: { session: null },
+      error: null,
+    });
+    // Also mock the supabase.auth.getSession which is used in the useEffect
+    vi.mocked(supabase.supabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
+      error: null,
+    });
   });
 
   it("renders loading state initially", () => {
@@ -28,22 +49,44 @@ describe("App Component", () => {
   it("renders error state if signIn fails", async () => {
     vi.mocked(supabase.signIn).mockRejectedValue(new Error("Sign in failed"));
     render(<App />);
+
+    // Wait for the login form to appear (after loading finishes)
     await waitFor(() => {
-      expect(screen.getByText("Error: Sign in failed")).toBeInTheDocument();
+      expect(screen.getByText("My Cycle")).toBeInTheDocument();
+    });
+
+    // Fill in the form and submit to trigger the error
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/password/i);
+    const submitButton = screen.getByRole("button", { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+    fireEvent.change(passwordInput, { target: { value: "password123" } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Sign in failed")).toBeInTheDocument();
     });
   });
 
   it("renders cycle data and predictions after successful initialization", async () => {
     const mockUser = { id: "123" } as User;
+    const mockSession = { user: mockUser } as Session;
     const mockCycleData: CycleData[] = [
       { id: 1, user_id: "123", date: "2023-01-01", cycle_day: 1, period: true },
     ];
     const mockCycleStarts = [{ date: "2023-01-01" }, { date: "2023-02-01" }];
     const mockAvgCycleLength = 28;
 
+    // Mock getSession to return a session
+    vi.mocked(supabase.getSession).mockResolvedValue({
+      data: { session: mockSession },
+      error: null,
+    });
+
     vi.mocked(supabase.signIn).mockResolvedValue({
       user: mockUser,
-      session: {} as Session,
+      session: mockSession,
     });
     vi.mocked(supabase.getCycleData).mockResolvedValue(mockCycleData);
     vi.mocked(supabase.getLast12CycleStarts).mockResolvedValue(mockCycleStarts);
@@ -63,6 +106,7 @@ describe("App Component", () => {
 
   it("logs period when Log Period button is clicked", async () => {
     const mockUser = { id: "123" } as User;
+    const mockSession = { user: mockUser } as Session;
     const mockCycleData: CycleData[] = [
       {
         id: 1,
@@ -79,9 +123,15 @@ describe("App Component", () => {
       { id: 3, user_id: "123", date: "2023-03-01", cycle_day: 1, period: true },
     ];
 
+    // Mock getSession to return a session
+    vi.mocked(supabase.getSession).mockResolvedValue({
+      data: { session: mockSession },
+      error: null,
+    });
+
     vi.mocked(supabase.signIn).mockResolvedValue({
       user: mockUser,
-      session: {} as Session,
+      session: mockSession,
     });
     vi.mocked(supabase.getCycleData).mockResolvedValue(mockCycleData);
     vi.mocked(supabase.getLast12CycleStarts).mockResolvedValue(mockCycleStarts);

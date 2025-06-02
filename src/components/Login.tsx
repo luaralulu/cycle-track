@@ -21,7 +21,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, loading, error }) => {
   return (
     <div className="login-bg">
       <form className="login-card" onSubmit={handleSubmit}>
-        <h1 className="login-title">Cycle Tracker</h1>
+        <h1 className="login-title">My Cycle</h1>
         <label className="login-label">
           Email
           <input

@@ -54,7 +54,7 @@ describe("App Component", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("Cycle Tracker")).toBeInTheDocument();
+      expect(screen.getByText("My Cycle")).toBeInTheDocument();
       expect(
         screen.getByText("Average Cycle Length: 28 days")
       ).toBeInTheDocument();

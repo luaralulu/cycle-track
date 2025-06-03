@@ -54,6 +54,7 @@ A web-based menstrual cycle tracker for visualising, logging, and predicting per
 
   - Next **period** (5 days, starts at next estimated `cycle_day = 1`)
   - **PMS window**: 6 – 8 days before predicted period start
+  - Ovulation day: 14 days before period start (single day, no fertile window)
 
 - Predicted values are marked in the calendar UI
 

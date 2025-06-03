@@ -25,6 +25,7 @@ export function useCycleData(userId?: string | null) {
     null
   );
   const [nextPeriodStart, setNextPeriodStart] = useState<Date | null>(null);
+  const [nextOvulationDate, setNextOvulationDate] = useState<Date | null>(null);
   const [pmsWindow, setPmsWindow] = useState<{ start: Date; end: Date } | null>(
     null
   );
@@ -57,6 +58,11 @@ export function useCycleData(userId?: string | null) {
           nextStart.setDate(lastStart.getDate() + avg);
           setNextPeriodStart(nextStart);
 
+          // Calculate next ovulation date (14 days before next period)
+          const nextOvulation = new Date(nextStart);
+          nextOvulation.setDate(nextStart.getDate() - 14);
+          setNextOvulationDate(nextOvulation);
+
           // Calculate PMS window (6-8 days before next period)
           setPmsWindow({
             start: new Date(nextStart.getTime() - 8 * 24 * 60 * 60 * 1000),
@@ -64,6 +70,7 @@ export function useCycleData(userId?: string | null) {
           });
         } else {
           setNextPeriodStart(null);
+          setNextOvulationDate(null);
           setPmsWindow(null);
         }
       } catch (err) {
@@ -153,6 +160,18 @@ export function useCycleData(userId?: string | null) {
     return period;
   }, [nextPeriodStart]);
 
+  /**
+   * Memoized set of predicted ovulation dates
+   * Based on calculated next ovulation date
+   */
+  const predictedOvulation = useMemo(() => {
+    const ovulation = new Set<string>();
+    if (nextOvulationDate) {
+      ovulation.add(format(nextOvulationDate, "yyyy-MM-dd"));
+    }
+    return ovulation;
+  }, [nextOvulationDate]);
+
   // Get the 5 most recent entries for quick reference
   const recentEntries = useMemo(() => cycleData.slice(0, 5), [cycleData]);
 
@@ -194,11 +213,13 @@ export function useCycleData(userId?: string | null) {
     handleLogPeriod,
     averageCycleLength,
     nextPeriodStart,
+    nextOvulationDate,
     pmsWindow,
     periodDates,
     cycleDayMap,
     predictedPMS,
     predictedPeriod,
+    predictedOvulation,
     getPredictedCycleDay,
     shouldShowLogButton,
     recentEntries,

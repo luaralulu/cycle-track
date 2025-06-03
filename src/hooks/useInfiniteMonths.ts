@@ -69,7 +69,7 @@ export function useMultiMonthNavigation(userId?: string | null) {
    * Calculate multiple future cycle predictions
    * @param startDate - Starting date for predictions
    * @param cyclesCount - Number of cycles to predict
-   * @returns Array of cycle predictions with period and PMS dates
+   * @returns Array of cycle predictions with period, PMS, and ovulation dates
    */
   const calculateMultipleFutureCycles = useCallback(
     (
@@ -79,6 +79,7 @@ export function useMultiMonthNavigation(userId?: string | null) {
       cycleStart: Date;
       periodDates: Date[];
       pmsDates: Date[];
+      ovulationDate: Date;
     }> => {
       if (!averageCycleLength || !lastCycleStart) return [];
 
@@ -103,10 +104,14 @@ export function useMultiMonthNavigation(userId?: string | null) {
           pmsDates.push(addDays(currentCycleStart, -j));
         }
 
+        // Ovulation date: 14 days before cycle start (typical luteal phase)
+        const ovulationDate = addDays(currentCycleStart, -14);
+
         cycles.push({
           cycleStart: new Date(currentCycleStart),
           periodDates,
           pmsDates,
+          ovulationDate,
         });
 
         // Move to next cycle
@@ -141,6 +146,7 @@ export function useMultiMonthNavigation(userId?: string | null) {
       // Create sets for easy lookup
       const periodDatesSet = new Set();
       const pmsDatesSet = new Set();
+      const ovulationDatesSet = new Set();
 
       futureCycles.forEach((cycle) => {
         cycle.periodDates.forEach((date) => {
@@ -149,6 +155,8 @@ export function useMultiMonthNavigation(userId?: string | null) {
         cycle.pmsDates.forEach((date) => {
           pmsDatesSet.add(format(date, "yyyy-MM-dd"));
         });
+        // Add ovulation date to the set
+        ovulationDatesSet.add(format(cycle.ovulationDate, "yyyy-MM-dd"));
       });
 
       const predictedData: CycleData[] = [];
@@ -330,6 +338,47 @@ export function useMultiMonthNavigation(userId?: string | null) {
   ]);
 
   /**
+   * Calculate past ovulation dates from historical cycle data
+   * @param cycleData - Historical cycle data for a month
+   * @returns Set of ovulation date strings for this month
+   */
+  const calculatePastOvulationDates = useCallback(
+    (cycleData: CycleData[]): Set<string> => {
+      const ovulationDates = new Set<string>();
+
+      // Find all cycle starts (cycle_day = 1) in this data
+      const cycleStarts = cycleData.filter((entry) => entry.cycle_day === 1);
+
+      cycleStarts.forEach((cycleStart) => {
+        // Calculate ovulation date: 14 days before this cycle start
+        const cycleStartDate = new Date(cycleStart.date);
+        const ovulationDate = addDays(cycleStartDate, -14);
+
+        // Check if the ovulation date falls within the same month as our data
+        const ovulationDateStr = format(ovulationDate, "yyyy-MM-dd");
+        const ovulationMonth = ovulationDate.getMonth();
+        const ovulationYear = ovulationDate.getFullYear();
+
+        // Check if any of our cycle data is from the same month as ovulation
+        const hasDataInOvulationMonth = cycleData.some((entry) => {
+          const entryDate = new Date(entry.date);
+          return (
+            entryDate.getMonth() === ovulationMonth &&
+            entryDate.getFullYear() === ovulationYear
+          );
+        });
+
+        if (hasDataInOvulationMonth) {
+          ovulationDates.add(ovulationDateStr);
+        }
+      });
+
+      return ovulationDates;
+    },
+    []
+  );
+
+  /**
    * Get cycle data for a specific month
    */
   const getCycleDataForMonth = useCallback(
@@ -350,6 +399,7 @@ export function useMultiMonthNavigation(userId?: string | null) {
         return {
           predictedPMS: new Set<string>(),
           predictedPeriod: new Set<string>(),
+          predictedOvulation: new Set<string>(),
           getPredictedCycleDay: () => null,
         };
       }
@@ -363,6 +413,7 @@ export function useMultiMonthNavigation(userId?: string | null) {
       // Build prediction sets
       const predictedPMS = new Set<string>();
       const predictedPeriod = new Set<string>();
+      const predictedOvulation = new Set<string>();
 
       futureCycles.forEach((cycle) => {
         cycle.periodDates.forEach((date) => {
@@ -375,6 +426,13 @@ export function useMultiMonthNavigation(userId?: string | null) {
             predictedPMS.add(format(date, "yyyy-MM-dd"));
           }
         });
+        // Add ovulation if it falls within this month
+        if (
+          cycle.ovulationDate >= monthStart &&
+          cycle.ovulationDate <= monthEnd
+        ) {
+          predictedOvulation.add(format(cycle.ovulationDate, "yyyy-MM-dd"));
+        }
       });
 
       // Function to predict cycle day for any date
@@ -395,6 +453,7 @@ export function useMultiMonthNavigation(userId?: string | null) {
       return {
         predictedPMS,
         predictedPeriod,
+        predictedOvulation,
         getPredictedCycleDay,
       };
     },
@@ -412,5 +471,6 @@ export function useMultiMonthNavigation(userId?: string | null) {
     loadNextMonth,
     getCycleDataForMonth,
     getFuturePredictionsForMonth,
+    calculatePastOvulationDates,
   };
 }

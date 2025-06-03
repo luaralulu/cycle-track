@@ -9,6 +9,8 @@ interface CalendarProps {
   cycleDayMap: Record<string, number>;
   predictedPMS: Set<string>;
   predictedPeriod: Set<string>;
+  predictedOvulation: Set<string>;
+  pastOvulationDates: Set<string>;
   getPredictedCycleDay: (date: Date) => number | null;
 }
 
@@ -46,6 +48,8 @@ const Calendar: React.FC<CalendarProps> = ({
   cycleDayMap,
   predictedPMS,
   predictedPeriod,
+  predictedOvulation,
+  pastOvulationDates,
   getPredictedCycleDay,
 }) => {
   const days = getMonthDays(monthDate);
@@ -72,6 +76,9 @@ const Calendar: React.FC<CalendarProps> = ({
             const isPeriod = periodDates.has(dateStr);
             const isPredictedPeriod = predictedPeriod.has(dateStr) && !isPeriod;
             const isPMS = predictedPMS.has(dateStr);
+            const isOvulation =
+              predictedOvulation.has(dateStr) ||
+              pastOvulationDates.has(dateStr);
             const cycleDay = cycleDayMap[dateStr] || getPredictedCycleDay(date);
             return (
               <div
@@ -82,7 +89,9 @@ const Calendar: React.FC<CalendarProps> = ({
                         ? " calendar-period"
                         : isPredictedPeriod
                         ? " calendar-predicted-period"
-                        : "") + (isPMS ? " calendar-pms" : "")
+                        : "") +
+                      (isPMS ? " calendar-pms" : "") +
+                      (isOvulation ? " calendar-ovulation" : "")
                     : " calendar-out"
                 }`}
               >

@@ -288,6 +288,13 @@ button:disabled {
   background: #e9e4e4;
   font-weight: 600;
 }
+.calendar-ovulation {
+  background: none;
+  border: 2px dotted #757474;
+  color: #2c3e50;
+  font-weight: 500;
+  box-sizing: border-box;
+}
 .calendar-cycle-day {
   font-size: 0.5rem;
   background: none;
@@ -307,6 +314,10 @@ button:disabled {
 }
 .calendar-pms .calendar-cycle-day {
   background: #e9e4e4;
+}
+.calendar-ovulation .calendar-cycle-day {
+  background: #757474;
+  color: #fff;
 }
 .calendar-date {
   font-size: 1.1rem;

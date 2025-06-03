@@ -338,6 +338,89 @@ export function useMultiMonthNavigation(userId?: string | null) {
   ]);
 
   /**
+   * Calculate historical PMS and ovulation dates for a past month
+   * @param monthDate - The month to calculate predictions for
+   * @param cycleData - Historical cycle data for this month
+   * @returns Object with historical PMS and ovulation predictions
+   */
+  const calculateHistoricalPredictions = useCallback(
+    (monthDate: Date, cycleData: CycleData[]) => {
+      if (!averageCycleLength || !lastCycleStart) {
+        return {
+          historicalPMS: new Set<string>(),
+          historicalOvulation: new Set<string>(),
+        };
+      }
+
+      const monthStart = startOfMonth(monthDate);
+      const monthEnd = endOfMonth(monthDate);
+      const historicalPMS = new Set<string>();
+      const historicalOvulation = new Set<string>();
+
+      // Find cycle starts in this month and the months around it to calculate PMS and ovulation
+      const cycleStarts = cycleData.filter((entry) => entry.cycle_day === 1);
+
+      // For each cycle start, calculate backwards to find PMS and ovulation for this month
+      cycleStarts.forEach((cycleStart) => {
+        const cycleStartDate = new Date(cycleStart.date);
+
+        // Calculate PMS dates (6-8 days before this cycle start)
+        for (let j = 8; j >= 6; j--) {
+          const pmsDate = addDays(cycleStartDate, -j);
+          if (pmsDate >= monthStart && pmsDate <= monthEnd) {
+            historicalPMS.add(format(pmsDate, "yyyy-MM-dd"));
+          }
+        }
+
+        // Calculate ovulation date (14 days before this cycle start)
+        const ovulationDate = addDays(cycleStartDate, -14);
+        if (ovulationDate >= monthStart && ovulationDate <= monthEnd) {
+          historicalOvulation.add(format(ovulationDate, "yyyy-MM-dd"));
+        }
+      });
+
+      // Also check if there are cycles that started in future months that affect this month
+      // We can use the average cycle length to predict where cycles might have been
+      if (cycleStarts.length > 0) {
+        const lastCycleInData = cycleStarts[cycleStarts.length - 1];
+        const lastCycleDate = new Date(lastCycleInData.date);
+
+        // Project forward to find next cycle starts that might affect this month
+        let nextCycleDate = addDays(lastCycleDate, averageCycleLength);
+
+        // Check up to 2 cycles forward
+        for (let i = 0; i < 2; i++) {
+          // PMS for this projected cycle
+          for (let j = 8; j >= 6; j--) {
+            const pmsDate = addDays(nextCycleDate, -j);
+            if (pmsDate >= monthStart && pmsDate <= monthEnd) {
+              historicalPMS.add(format(pmsDate, "yyyy-MM-dd"));
+            }
+          }
+
+          // Ovulation for this projected cycle
+          const ovulationDate = addDays(nextCycleDate, -14);
+          if (ovulationDate >= monthStart && ovulationDate <= monthEnd) {
+            historicalOvulation.add(format(ovulationDate, "yyyy-MM-dd"));
+          }
+
+          // Move to next cycle
+          nextCycleDate = addDays(nextCycleDate, averageCycleLength);
+
+          // If we're getting too far in the future, stop
+          if (nextCycleDate > addMonths(monthEnd, 2)) break;
+        }
+      }
+
+      return {
+        historicalPMS,
+        historicalOvulation,
+      };
+    },
+    [averageCycleLength, lastCycleStart]
+  );
+
+  /**
    * Calculate past ovulation dates from historical cycle data
    * @param cycleData - Historical cycle data for a month
    * @returns Set of ovulation date strings for this month
@@ -472,5 +555,6 @@ export function useMultiMonthNavigation(userId?: string | null) {
     getCycleDataForMonth,
     getFuturePredictionsForMonth,
     calculatePastOvulationDates,
+    calculateHistoricalPredictions,
   };
 }

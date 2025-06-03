@@ -66,6 +66,7 @@ function App() {
     getCycleDataForMonth: getMonthData,
     getFuturePredictionsForMonth,
     calculatePastOvulationDates,
+    calculateHistoricalPredictions,
   } = useMultiMonthNavigation(userId);
 
   /**
@@ -218,17 +219,31 @@ function App() {
         )}
 
         {/* Render all months with fade-in animation */}
-        {months.map((monthDate, index) => {
-          // For all months except the current month, use future predictions
-          const isFutureMonth = index >= 1;
+        {months.map((monthDate) => {
+          // The months array starts with the earliest month and goes to the latest
+          // We need to find which month is the current month
+          const currentDate = new Date();
 
-          // Get future predictions for this month if it's a future month
+          const isFutureMonth = monthDate > currentDate;
+          const isPastMonth =
+            monthDate <
+            new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+          // Get month data
+          const monthData = getMonthData(monthDate);
+
+          // For future months, use future predictions
           const futurePredictions = isFutureMonth
             ? getFuturePredictionsForMonth(monthDate)
             : null;
 
-          // For past months, calculate historical ovulation dates
-          const monthData = getMonthData(monthDate);
+          // For past months (loaded historical data), calculate historical predictions
+          const historicalPredictions =
+            isPastMonth && monthData.length > 0
+              ? calculateHistoricalPredictions(monthDate, monthData)
+              : null;
+
+          // Legacy past ovulation calculation (keeping for compatibility)
           const pastOvulationDates =
             monthData.length > 0
               ? calculatePastOvulationDates(monthData)
@@ -247,12 +262,18 @@ function App() {
                 cycleData={monthData}
                 periodDates={periodDates}
                 cycleDayMap={cycleDayMap}
-                predictedPMS={futurePredictions?.predictedPMS || predictedPMS}
+                predictedPMS={
+                  futurePredictions?.predictedPMS ||
+                  historicalPredictions?.historicalPMS ||
+                  predictedPMS
+                }
                 predictedPeriod={
                   futurePredictions?.predictedPeriod || predictedPeriod
                 }
                 predictedOvulation={
-                  futurePredictions?.predictedOvulation || predictedOvulation
+                  futurePredictions?.predictedOvulation ||
+                  historicalPredictions?.historicalOvulation ||
+                  predictedOvulation
                 }
                 pastOvulationDates={pastOvulationDates}
                 getPredictedCycleDay={

@@ -65,6 +65,7 @@ function App() {
     loadNextMonth,
     getCycleDataForMonth: getMonthData,
     getFuturePredictionsForMonth,
+    calculatePastOvulationDates,
   } = useMultiMonthNavigation(userId);
 
   /**
@@ -140,6 +141,7 @@ function App() {
     cycleDayMap,
     predictedPMS,
     predictedPeriod,
+    predictedOvulation,
     getPredictedCycleDay,
     shouldShowLogButton,
   } = cycleDataState;
@@ -225,6 +227,13 @@ function App() {
             ? getFuturePredictionsForMonth(monthDate)
             : null;
 
+          // For past months, calculate historical ovulation dates
+          const monthData = getMonthData(monthDate);
+          const pastOvulationDates =
+            monthData.length > 0
+              ? calculatePastOvulationDates(monthData)
+              : new Set<string>();
+
           return (
             <div
               key={`${monthDate.getFullYear()}-${monthDate.getMonth()}`}
@@ -235,13 +244,17 @@ function App() {
             >
               <Calendar
                 monthDate={monthDate}
-                cycleData={getMonthData(monthDate)}
+                cycleData={monthData}
                 periodDates={periodDates}
                 cycleDayMap={cycleDayMap}
                 predictedPMS={futurePredictions?.predictedPMS || predictedPMS}
                 predictedPeriod={
                   futurePredictions?.predictedPeriod || predictedPeriod
                 }
+                predictedOvulation={
+                  futurePredictions?.predictedOvulation || predictedOvulation
+                }
+                pastOvulationDates={pastOvulationDates}
                 getPredictedCycleDay={
                   futurePredictions?.getPredictedCycleDay ||
                   getPredictedCycleDay

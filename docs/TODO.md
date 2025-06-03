@@ -117,3 +117,19 @@
 
 - [x] Add **fade/slide-in animation** for month entry  
        **Acceptance Criteria**: New month grids appear with a smooth transition; no jarring jump is observed.
+
+---
+
+## 🆕 Phase 7: Ovulation Day Prediction
+
+- [x] Extend prediction engine to calculate **future ovulation day** (14 days before predicted period start)  
+       **Acceptance Criteria**: Function returns correct ovulation dates and calendar shows dotted-circle marker for all predicted months (max 3 months ahead).
+
+- [x] Infer **past ovulation day** for each completed cycle (14 days before logged `cycle_day = 1`) when fetching historical data  
+       **Acceptance Criteria**: Upon past months display the ovulation marker on the correct date for every cycle retrieved (up to 6 months back).
+
+- [x] Render ovulation marker as **dark-grey dotted outline, no fill** inside the day cell  
+       **Acceptance Criteria**: Visual style matches spec; marker does not obscure period or PMS colours.
+
+- [x] Ensure ovulation markers integrate with **button fetch logic**  
+       **Acceptance Criteria**: Markers appear immediately after a month grid is prepended/appended without additional refresh.

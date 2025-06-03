@@ -2,7 +2,7 @@
 
 ## Overview
 
-A web-based menstrual cycle tracker for visualizing, logging, and predicting period cycles. Built with **TypeScript**, **Vite**, **React**, and **Supabase**. The app supports manual tracking, automated data fill, prediction, and calendar-based display, optimized for both desktop and mobile.
+A web-based menstrual cycle tracker for visualising, logging, and predicting period cycles. Built with **TypeScript**, **Vite**, **React**, and **Supabase**. The app supports manual tracking, automated data fill, prediction, and calendar-based display, optimised for both desktop and mobile.
 
 ---
 
@@ -21,7 +21,7 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
 
 ### 🔴 Period Logging
 
-- A single **"Log Period"** button
+- A single **“Log Period”** button
 - When clicked:
 
   - Inserts a new entry for today with:
@@ -36,11 +36,11 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
 ### ⏱️ Cron-Based Data Filler
 
 - Runs daily as a cron job
-- Checks if **yesterday's** data exists
+- Checks if **yesterday’s** data exists
 - If missing, inserts a new row:
 
   - `cycle_day = last known + 1`
-  - `period = true` if `cycle_day` in \[2, 3, 4, 5]
+  - `period = true` if `cycle_day` in \[2 – 5]
   - `period = false` if `cycle_day >= 6`
 
 - Authenticates with Supabase using email and password from `.env`
@@ -53,7 +53,7 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
 - Predicts:
 
   - Next **period** (5 days, starts at next estimated `cycle_day = 1`)
-  - **PMS window**: 6–8 days before predicted period start
+  - **PMS window**: 6 – 8 days before predicted period start
 
 - Predicted values are marked in the calendar UI
 
@@ -67,13 +67,24 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
   - Month transitions
   - Data display updates
 
-- Color coding:
+- Colour coding:
 
-  - 🔴 Red/Pink: Logged or predicted **period** days
-  - ⚫ Dark gray with white text: Predicted **PMS** days
-  - ⚪ Neutral: All other days
+  - 🔴 Red/Pink: logged or predicted **period** days
+  - ⚫ Dark grey with white text: predicted **PMS** days
+  - ⚪ Neutral: all other days
 
 - Each day is editable by clicking
+
+---
+
+### 📜 Multi-Month Scroll Calendar
+
+- **Initial view**: show **current month + next month** stacked vertically after login
+- **Vertical stack**: each month rendered as a full-width grid inside a single scroll container
+- **Scroll-up fetch**: when user scrolls within the top 10 % of the container, fetch the **previous month** from Supabase and prepend; stop after **6 past months**
+- **Scroll-down fetch**: when user scrolls within the bottom 10 % of the container, generate the **next month** using the prediction engine and append; stop after **3 future months**
+- **Animations**: new month grids fade/slide in smoothly; scroll position is preserved to avoid jumpiness
+- **Data sources**: past months come from Supabase; future months use prediction logic
 
 ---
 
@@ -82,7 +93,7 @@ A web-based menstrual cycle tracker for visualizing, logging, and predicting per
 | Layer            | Technology                                   |
 | ---------------- | -------------------------------------------- |
 | Frontend         | React + TypeScript + Vite                    |
-| Backend/Auth     | Supabase (Auth with email/password)          |
+| Backend/Auth     | Supabase (email/password auth)               |
 | Cron Jobs        | GitHub Actions                               |
 | Styling/UX       | Tailwind CSS or CSS-in-JS                    |
 | Calendar Display | Custom grid or library like `react-calendar` |
@@ -112,8 +123,6 @@ create table public.cycle_data (
 ```env
 SUPABASE_URL=<your-supabase-url>
 SUPABASE_ANON_KEY=<your-anon-key>
-SUPABASE_USER_EMAIL=<your-login-email>
-SUPABASE_USER_PASSWORD=<your-login-password>
 ```
 
 ---

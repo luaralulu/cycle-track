@@ -112,3 +112,24 @@ export const getSession = async () => {
 export const signOut = async () => {
   return supabase.auth.signOut();
 };
+
+export const getCycleDataForMonth = async (
+  userId: string,
+  year: number,
+  month: number // 0-based month (0 = January, 11 = December)
+): Promise<CycleData[]> => {
+  // Calculate start and end dates for the month
+  const startDate = new Date(year, month, 1).toISOString().split("T")[0];
+  const endDate = new Date(year, month + 1, 0).toISOString().split("T")[0];
+
+  const { data, error } = await supabase
+    .from("cycle_data")
+    .select("*")
+    .eq("user_id", userId)
+    .gte("date", startDate)
+    .lte("date", endDate)
+    .order("date", { ascending: true });
+
+  if (error) throw error;
+  return data as CycleData[];
+};

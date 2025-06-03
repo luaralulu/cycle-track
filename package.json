@@ -1,7 +1,7 @@
 {
-  "name": "cycle-track",
+  "name": "my-cycle",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@peculiar/webcrypto": "^1.5.0",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",
     "@types/react": "^18.2.64",

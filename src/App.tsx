@@ -218,7 +218,6 @@ function App() {
         {/* Render all months with fade-in animation */}
         {months.map((monthDate, index) => {
           // For all months except the current month, use future predictions
-          const isCurrentMonth = index === 0;
           const isFutureMonth = index >= 1;
 
           // Get future predictions for this month if it's a future month

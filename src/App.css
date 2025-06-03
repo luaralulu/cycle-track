@@ -285,8 +285,7 @@ button:disabled {
   color: #fff;
 }
 .calendar-pms {
-  background: #757474;
-  color: #fff;
+  background: #e9e4e4;
   font-weight: 600;
 }
 .calendar-cycle-day {
@@ -307,8 +306,7 @@ button:disabled {
   color: #fff;
 }
 .calendar-pms .calendar-cycle-day {
-  background: #757474;
-  color: #fff;
+  background: #e9e4e4;
 }
 .calendar-date {
   font-size: 1.1rem;

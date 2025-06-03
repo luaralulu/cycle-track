@@ -7,7 +7,6 @@ import {
   endOfMonth,
   eachDayOfInterval,
   addDays,
-  parseISO,
 } from "date-fns";
 import {
   getCycleDataForMonth as fetchCycleDataForMonth,
@@ -157,10 +156,8 @@ export function useMultiMonthNavigation(userId?: string | null) {
       daysInMonth.forEach((day, index) => {
         const dateStr = format(day, "yyyy-MM-dd");
         const isPeriod = periodDatesSet.has(dateStr);
-        const isPMS = pmsDatesSet.has(dateStr);
 
         // Calculate cycle day based on user's actual cycle length and last known start
-        let cycleDay = 1;
         let tempDate = new Date(lastCycleStart);
         let currentCycleDay = 1;
 
@@ -171,13 +168,12 @@ export function useMultiMonthNavigation(userId?: string | null) {
             currentCycleDay = 1;
           }
         }
-        cycleDay = currentCycleDay;
 
         predictedData.push({
           id: -(index + 1), // Negative ID to indicate predicted data
           user_id: userId,
           date: dateStr,
-          cycle_day: cycleDay,
+          cycle_day: currentCycleDay,
           period: isPeriod,
         });
       });
@@ -383,7 +379,6 @@ export function useMultiMonthNavigation(userId?: string | null) {
 
       // Function to predict cycle day for any date
       const getPredictedCycleDay = (targetDate: Date) => {
-        let cycleDay = 1;
         let tempDate = new Date(lastCycleStart);
         let currentCycleDay = 1;
 

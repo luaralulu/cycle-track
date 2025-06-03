@@ -109,11 +109,11 @@
 - [x] **Fetch previous month** from Supabase and prepend when button is clicked (limit = 6 months back)  
        **Acceptance Criteria**: Clicking button prepends exactly one month's grid with correct historical data; button becomes disabled once six past months have loaded.
 
-- [ ] Add **"Load Next Month" button** at the bottom of the calendar container  
+- [x] Add **"Load Next Month" button** at the bottom of the calendar container  
        **Acceptance Criteria**: Button is visible and clickable; generates prediction data for future months.
 
-- [ ] **Generate next month** via prediction engine and append when button is clicked (limit = 3 months ahead)  
+- [x] **Generate next month** via prediction engine and append when button is clicked (limit = 3 months ahead)  
        **Acceptance Criteria**: Clicking button appends one month's grid using prediction data; button becomes disabled after three future months are displayed.
 
-- [ ] Add **fade/slide-in animation** for month entry  
+- [x] Add **fade/slide-in animation** for month entry  
        **Acceptance Criteria**: New month grids appear with a smooth transition; no jarring jump is observed.

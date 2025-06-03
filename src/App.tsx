@@ -57,10 +57,14 @@ function App() {
   const {
     months,
     isLoadingPrevious,
+    isLoadingNext,
     canLoadMorePrevious,
+    canLoadMoreNext,
     scrollContainerRef,
     loadPreviousMonth,
+    loadNextMonth,
     getCycleDataForMonth: getMonthData,
+    getFuturePredictionsForMonth,
   } = useMultiMonthNavigation(userId);
 
   /**
@@ -197,20 +201,6 @@ function App() {
           </div>
         )}
 
-        {/* Render all months */}
-        {months.map((monthDate, index) => (
-          <Calendar
-            key={`${monthDate.getFullYear()}-${monthDate.getMonth()}`}
-            monthDate={monthDate}
-            cycleData={getMonthData(monthDate)}
-            periodDates={periodDates}
-            cycleDayMap={cycleDayMap}
-            predictedPMS={predictedPMS}
-            predictedPeriod={predictedPeriod}
-            getPredictedCycleDay={getPredictedCycleDay}
-          />
-        ))}
-
         {/* Info about maximum history reached */}
         {!canLoadMorePrevious && (
           <div
@@ -222,6 +212,77 @@ function App() {
             }}
           >
             Reached maximum history (6 months back)
+          </div>
+        )}
+
+        {/* Render all months with fade-in animation */}
+        {months.map((monthDate, index) => {
+          // For all months except the current month, use future predictions
+          const isCurrentMonth = index === 0;
+          const isFutureMonth = index >= 1;
+
+          // Get future predictions for this month if it's a future month
+          const futurePredictions = isFutureMonth
+            ? getFuturePredictionsForMonth(monthDate)
+            : null;
+
+          return (
+            <div
+              key={`${monthDate.getFullYear()}-${monthDate.getMonth()}`}
+              style={{
+                animation: "fadeSlideIn 0.5s ease-in-out",
+                marginBottom: "24px",
+              }}
+            >
+              <Calendar
+                monthDate={monthDate}
+                cycleData={getMonthData(monthDate)}
+                periodDates={periodDates}
+                cycleDayMap={cycleDayMap}
+                predictedPMS={futurePredictions?.predictedPMS || predictedPMS}
+                predictedPeriod={
+                  futurePredictions?.predictedPeriod || predictedPeriod
+                }
+                getPredictedCycleDay={
+                  futurePredictions?.getPredictedCycleDay ||
+                  getPredictedCycleDay
+                }
+              />
+            </div>
+          );
+        })}
+
+        {/* Load Next Month Button */}
+        {canLoadMoreNext && (
+          <div style={{ textAlign: "center", marginTop: "16px" }}>
+            <button
+              onClick={loadNextMonth}
+              disabled={isLoadingNext}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: isLoadingNext ? "#ccc" : "#ff8fa3",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: isLoadingNext ? "not-allowed" : "pointer",
+              }}
+            >
+              {isLoadingNext ? "Loading..." : "Load Next Month"}
+            </button>
+          </div>
+        )}
+
+        {/* Info about maximum future months reached */}
+        {!canLoadMoreNext && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "16px",
+              color: "#999",
+              fontSize: "14px",
+            }}
+          >
+            Reached maximum predictions (3 months ahead)
           </div>
         )}
       </div>

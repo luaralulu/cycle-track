@@ -133,3 +133,32 @@
 
 - [x] Ensure ovulation markers integrate with **button fetch logic**  
        **Acceptance Criteria**: Markers appear immediately after a month grid is prepended/appended without additional refresh.
+
+Here is the new section to add to your `TODO.md`, starting at **Phase 8**, in the same style:
+
+---
+
+## 🆕 Phase 8: Google Calendar Integration
+
+### 📆 Sync Predictions to Google Calendar
+
+- [x] Set up `.env` with `GOOGLE_CYCLE_CALENDAR_ID`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET`
+      **Acceptance Criteria**: All credentials are present and loaded without error.
+
+- [x] Add Google OAuth flow and store tokens in `google_auth_tokens` table
+      **Acceptance Criteria**: User completes OAuth flow and their tokens are stored in Supabase as per schema.
+
+- [x] On period log: detect next predicted PMS window and period
+      **Acceptance Criteria**: After logging a new period, both predictions are calculated and available in memory.
+
+- [x] Create PMS window event (3 days before predicted period)
+      **Acceptance Criteria**: Google Calendar shows 3-day all-day event titled `🧘‍♀️ 8 days before bleeding` ending the day before bleeding.
+
+- [x] Create Period event (5-day starting on predicted period)
+      **Acceptance Criteria**: Google Calendar shows 5-day all-day event titled `🩸 Bleeding` starting on predicted period day.
+
+- [x] Use user's local timezone for event times
+      **Acceptance Criteria**: Events appear as all-day in local time, not UTC.
+
+- [x] Do not update or delete previously created calendar events
+      **Acceptance Criteria**: Re-logging a period does not modify existing events.

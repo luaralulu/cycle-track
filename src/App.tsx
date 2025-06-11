@@ -79,6 +79,7 @@ function App() {
       setSession(data.session);
       setAuthLoading(false);
     });
+
     // Listen for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event: string, session: Session | null) => {
@@ -145,6 +146,8 @@ function App() {
     predictedOvulation,
     getPredictedCycleDay,
     shouldShowLogButton,
+    calendarMessage,
+    calendarMessageType,
   } = cycleDataState;
 
   // Show loading state while fetching cycle data
@@ -175,6 +178,30 @@ function App() {
         nextPeriodStart={nextPeriodStart}
         pmsWindow={pmsWindow}
       />
+
+      {/* Google Calendar Status Messages */}
+      {calendarMessage && (
+        <div
+          style={{
+            padding: "0.75rem 1rem",
+            margin: "1rem 0",
+            backgroundColor:
+              calendarMessageType === "success" ? "#e8f5e8" : "#ffebee",
+            border: `1px solid ${
+              calendarMessageType === "success" ? "#4caf50" : "#f44336"
+            }`,
+            borderRadius: "6px",
+            color: calendarMessageType === "success" ? "#2e7d32" : "#d32f2f",
+            fontSize: "0.9rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span>{calendarMessageType === "success" ? "✅" : "❌"}</span>
+          <span>{calendarMessage}</span>
+        </div>
+      )}
 
       {/* Container for multiple months */}
       <div

@@ -1,5 +1,5 @@
 import React from "react";
-import { format, isSameMonth, addDays } from "date-fns";
+import { format, isSameMonth, addDays, isToday } from "date-fns";
 import type { CycleData } from "../lib/supabase";
 
 interface CalendarProps {
@@ -80,6 +80,7 @@ const Calendar: React.FC<CalendarProps> = ({
               predictedOvulation.has(dateStr) ||
               pastOvulationDates.has(dateStr);
             const cycleDay = cycleDayMap[dateStr] || getPredictedCycleDay(date);
+            const isTodayDate = isToday(date);
             return (
               <div
                 key={dateStr}
@@ -95,6 +96,9 @@ const Calendar: React.FC<CalendarProps> = ({
                     : " calendar-out"
                 }`}
               >
+                {isTodayDate && (
+                  <div className="calendar-today-label">TODAY</div>
+                )}
                 <div className="calendar-date">{date.getDate()}</div>
                 {cycleDay && (
                   <div className="calendar-cycle-day">{cycleDay}</div>

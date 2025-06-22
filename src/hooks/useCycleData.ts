@@ -225,14 +225,32 @@ export function useCycleData(userId?: string | null) {
    */
   const predictedPeriod = useMemo(() => {
     const period = new Set<string>();
+
+    // Add future cycle predictions
     if (nextPeriodStart) {
       for (let i = 0; i < 5; i++) {
         const d = addDays(nextPeriodStart, i);
         period.add(format(d, "yyyy-MM-dd"));
       }
     }
+
+    // Add current cycle predictions (days 2-5) if we just logged a period
+    const mostRecentEntry = cycleData[0];
+    if (
+      mostRecentEntry &&
+      mostRecentEntry.cycle_day === 1 &&
+      mostRecentEntry.period
+    ) {
+      const currentPeriodStart = parseISO(mostRecentEntry.date);
+      for (let i = 1; i < 5; i++) {
+        // Days 2, 3, 4, 5
+        const d = addDays(currentPeriodStart, i);
+        period.add(format(d, "yyyy-MM-dd"));
+      }
+    }
+
     return period;
-  }, [nextPeriodStart]);
+  }, [nextPeriodStart, cycleData]);
 
   /**
    * Memoized set of predicted ovulation dates

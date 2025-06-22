@@ -87,8 +87,6 @@ A web-based menstrual cycle tracker for visualising, logging, and predicting per
 - **Animations**: new month grids fade/slide in smoothly; scroll position is preserved to avoid jumpiness
 - **Data sources**: past months come from Supabase; future months use prediction logic
 
-Great, here's the new section for your `specifications.md`, following the existing markdown style:
-
 ---
 
 ### 📆 Google Calendar Integration

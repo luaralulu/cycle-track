@@ -134,8 +134,6 @@
 - [x] Ensure ovulation markers integrate with **button fetch logic**  
        **Acceptance Criteria**: Markers appear immediately after a month grid is prepended/appended without additional refresh.
 
-Here is the new section to add to your `TODO.md`, starting at **Phase 8**, in the same style:
-
 ---
 
 ## 🆕 Phase 8: Google Calendar Integration

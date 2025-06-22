@@ -308,6 +308,17 @@ button:disabled {
   z-index: 2;
   display: inline-block;
 }
+.calendar-today-label {
+  font-size: 0.5rem;
+  color: #2c3e50;
+  font-weight: 800;
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  white-space: nowrap;
+}
 .calendar-period .calendar-cycle-day {
   background: #ff8fa3;
   color: #fff;

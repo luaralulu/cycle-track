@@ -5,6 +5,7 @@ import {
   getLast12CycleStarts,
   calculateAverageCycleLength,
 } from "../lib/supabase";
+import { createCycleEvents, getGoogleAuthTokens } from "../lib/googleCalendar";
 import { addDays, format, parseISO } from "date-fns";
 import type { CycleData } from "../lib/supabase";
 
@@ -19,6 +20,12 @@ export function useCycleData(userId?: string | null) {
   const [error, setError] = useState<string | null>(null);
   const [cycleData, setCycleData] = useState<CycleData[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Calendar integration status
+  const [calendarMessage, setCalendarMessage] = useState<string | null>(null);
+  const [calendarMessageType, setCalendarMessageType] = useState<
+    "success" | "error" | null
+  >(null);
 
   // Prediction-related state
   const [averageCycleLength, setAverageCycleLength] = useState<number | null>(
@@ -45,6 +52,25 @@ export function useCycleData(userId?: string | null) {
         // Fetch user's cycle data
         const data = await getCycleData(userId);
         setCycleData(data);
+
+        // Check Google Calendar connection status
+        try {
+          const tokens = await getGoogleAuthTokens(userId);
+          if (tokens) {
+            console.log(
+              "✅ Google Calendar connected - calendar events will be created when logging periods"
+            );
+          } else {
+            console.log(
+              "⚠️ Google Calendar not connected - periods will be logged without calendar events"
+            );
+          }
+        } catch (error) {
+          console.error(
+            "❌ Failed to check Google Calendar connection:",
+            error
+          );
+        }
 
         // Calculate predictions based on historical data
         const cycleStarts = await getLast12CycleStarts(userId);
@@ -85,14 +111,62 @@ export function useCycleData(userId?: string | null) {
   /**
    * Handles logging a new period entry
    * Updates local state and triggers recalculation of predictions
+   * Creates Google Calendar events for next predicted PMS and period
    */
   const handleLogPeriod = async () => {
     if (!userId) return;
     try {
       setIsLoading(true);
+      setCalendarMessage(null);
+      setCalendarMessageType(null);
+
       const newEntry = await logPeriod(userId);
       setCycleData((prev) => [newEntry[0], ...prev]);
       setShowConfirmModal(false);
+
+      // Recalculate predictions after logging new period
+      const cycleStarts = await getLast12CycleStarts(userId);
+      const avg = calculateAverageCycleLength(cycleStarts);
+
+      if (cycleStarts.length > 0 && avg) {
+        // Calculate next period start date (prediction for calendar events)
+        const lastStart = new Date(cycleStarts[0].date);
+        const nextStart = new Date(lastStart);
+        nextStart.setDate(lastStart.getDate() + avg);
+
+        // Create Google Calendar events for predicted cycle
+        try {
+          await createCycleEvents(userId, nextStart);
+          console.log(
+            "✅ Successfully created Google Calendar events for next cycle"
+          );
+          setCalendarMessage("Calendar events created successfully!");
+          setCalendarMessageType("success");
+
+          // Clear message after 5 seconds
+          setTimeout(() => {
+            setCalendarMessage(null);
+            setCalendarMessageType(null);
+          }, 5000);
+        } catch (calendarError) {
+          console.error(
+            "❌ Failed to create Google Calendar events:",
+            calendarError
+          );
+          const errorMessage =
+            calendarError instanceof Error
+              ? calendarError.message
+              : "Unknown calendar error";
+          setCalendarMessage(`Calendar sync failed: ${errorMessage}`);
+          setCalendarMessageType("error");
+
+          // Clear message after 8 seconds (longer for errors)
+          setTimeout(() => {
+            setCalendarMessage(null);
+            setCalendarMessageType(null);
+          }, 8000);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to log period");
     } finally {
@@ -151,14 +225,32 @@ export function useCycleData(userId?: string | null) {
    */
   const predictedPeriod = useMemo(() => {
     const period = new Set<string>();
+
+    // Add future cycle predictions
     if (nextPeriodStart) {
       for (let i = 0; i < 5; i++) {
         const d = addDays(nextPeriodStart, i);
         period.add(format(d, "yyyy-MM-dd"));
       }
     }
+
+    // Add current cycle predictions (days 2-5) if we just logged a period
+    const mostRecentEntry = cycleData[0];
+    if (
+      mostRecentEntry &&
+      mostRecentEntry.cycle_day === 1 &&
+      mostRecentEntry.period
+    ) {
+      const currentPeriodStart = parseISO(mostRecentEntry.date);
+      for (let i = 1; i < 5; i++) {
+        // Days 2, 3, 4, 5
+        const d = addDays(currentPeriodStart, i);
+        period.add(format(d, "yyyy-MM-dd"));
+      }
+    }
+
     return period;
-  }, [nextPeriodStart]);
+  }, [nextPeriodStart, cycleData]);
 
   /**
    * Memoized set of predicted ovulation dates
@@ -223,5 +315,7 @@ export function useCycleData(userId?: string | null) {
     getPredictedCycleDay,
     shouldShowLogButton,
     recentEntries,
+    calendarMessage,
+    calendarMessageType,
   };
 }
